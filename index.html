@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>워크북 종합 퀴즈 (21~33번)</title>
+<style>
+:root{
+  --green:#1D9E75;--green-d:#0F6E56;--green-l:#E1F5EE;--green-deep:#085041;
+  --red:#A32D2D;--red-l:#FCEBEB;--red-deep:#501313;
+  --amber:#BA7517;--amber-l:#FAEEDA;--amber-deep:#633806;
+  --blue:#185FA5;--blue-l:#E6F1FB;--blue-deep:#0C3A6B;
+  --bg:#F5F3EF;--card:#FFFFFF;--border:rgba(0,0,0,0.08);
+  --text:#1a1a1a;--muted:#666;--hint:#aaa;--r:12px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Noto Sans KR","Apple SD Gothic Neo",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+#app{max-width:700px;margin:0 auto;padding:24px 16px 60px;}
+.intro-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:2rem 1.5rem;margin-top:16px;}
+.intro-logo{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--green);text-transform:uppercase;margin-bottom:14px;text-align:center;}
+.intro-title{font-size:24px;font-weight:800;line-height:1.3;margin-bottom:6px;text-align:center;}
+.intro-sub{font-size:13px;color:var(--muted);margin-bottom:22px;text-align:center;}
+.section-label{font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px;}
+.check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.check-item{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--rs);padding:10px 8px;cursor:pointer;transition:all .15s;user-select:none;}
+.check-item.selected{background:var(--green-l);border-color:var(--green);}
+.check-item-num{font-size:15px;font-weight:800;color:var(--text);margin-bottom:2px;}
+.check-item.selected .check-item-num{color:var(--green-deep);}
+.check-item-sub{font-size:10px;color:var(--muted);line-height:1.4;}
+.check-item.selected .check-item-sub{color:var(--green);}
+.ctrl-row{display:flex;gap:8px;margin-bottom:20px;}
+.ctrl-btn{flex:1;padding:9px;font-size:12px;font-weight:700;font-family:inherit;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--card);color:var(--muted);cursor:pointer;transition:all .12s;}
+.ctrl-btn:hover{border-color:var(--green);color:var(--green);}
+.info-row{display:flex;gap:10px;margin-bottom:20px;}
+.info-chip{flex:1;background:var(--bg);border-radius:var(--rs);padding:10px;text-align:center;}
+.info-chip-num{font-size:20px;font-weight:800;color:var(--green);}
+.info-chip-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.start-btn{width:100%;padding:15px;font-size:15px;font-weight:800;font-family:inherit;background:var(--green);color:#fff;border:none;border-radius:var(--r);cursor:pointer;transition:background .15s,transform .1s;}
+.start-btn:hover{background:var(--green-d);}
+.start-btn:active{transform:scale(.98);}
+.start-btn:disabled{background:#CCC;cursor:default;}
+.type-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800;}
+.tb-g{background:var(--blue-l);color:var(--blue-deep);}
+.hd-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.quiz-counter{font-size:13px;font-weight:700;color:var(--muted);}
+.cutline-chip{font-size:12px;font-weight:700;color:var(--green-deep);background:var(--green-l);padding:3px 10px;border-radius:99px;}
+.progress-wrap{height:5px;background:#DDD;border-radius:99px;overflow:hidden;margin-bottom:12px;}
+.progress-fill{height:5px;background:var(--green);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.timer-row{display:flex;justify-content:flex-end;margin-bottom:12px;}
+.timer-block{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.timer-lbl{font-size:10px;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;}
+.timer-ring{position:relative;width:52px;height:52px;}
+.timer-ring svg{transform:rotate(-90deg);}
+.timer-ring circle{fill:none;stroke-width:4;}
+.ring-bg{stroke:#E0E0E0;}
+.ring-fill{stroke:var(--green);stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .4s;}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--text);}
+.tw .ring-fill{stroke:var(--amber);}.tw .timer-num{color:var(--amber);}
+.td .ring-fill{stroke:var(--red);}.td .timer-num{color:var(--red);}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.td .timer-ring{animation:pulse .8s infinite;}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:14px;animation:fadeUp .22s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.q-num{font-size:11px;color:var(--hint);margin-bottom:8px;}
+.q-en{font-size:15px;line-height:2;margin-bottom:14px;color:var(--text);}
+.q-sub{font-size:14px;color:var(--text);margin-bottom:12px;}
+.blank-tag{font-weight:800;font-size:14px;color:var(--blue);background:var(--blue-l);padding:2px 8px;border-radius:5px;margin:0 2px;}
+.choices{display:flex;gap:8px;flex-wrap:wrap;}
+.choice-btn{flex:1;min-width:90px;padding:11px 12px;font-size:14px;font-family:inherit;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--card);color:var(--text);cursor:pointer;text-align:center;font-weight:600;transition:all .12s;}
+.choice-btn:hover:not(:disabled){border-color:var(--green);background:var(--green-l);color:var(--green-deep);}
+.choice-btn.correct{background:var(--green-l);border-color:var(--green);color:var(--green-deep);font-weight:800;}
+.choice-btn.wrong{background:var(--red-l);border-color:var(--red);color:var(--red-deep);}
+.choice-btn:disabled{cursor:default;}
+.timeout-msg{margin-top:10px;padding:10px 14px;border-radius:var(--rs);font-size:13px;font-weight:600;background:var(--amber-l);color:var(--amber-deep);border:1px solid #FAC775;}
+.answer-reveal{margin-top:10px;padding:9px 13px;border-radius:var(--rs);font-size:13px;font-weight:600;}
+.ar-ok{background:var(--green-l);color:var(--green-deep);}
+.ar-ng{background:var(--red-l);color:var(--red-deep);}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:30px 22px;text-align:center;margin-bottom:14px;}
+.result-emoji{font-size:46px;margin-bottom:10px;}
+.result-score{font-size:54px;font-weight:800;line-height:1;margin-bottom:8px;}
+.score-pass{color:var(--green);}.score-fail{color:var(--red);}
+.result-badge{display:inline-block;padding:5px 16px;border-radius:99px;font-size:14px;font-weight:800;margin-bottom:8px;}
+.badge-pass{background:var(--green-l);color:var(--green-deep);}.badge-fail{background:var(--red-l);color:var(--red-deep);}
+.result-pct{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.stat-row{display:flex;gap:10px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;}
+.stat-card{background:var(--bg);border-radius:var(--rs);padding:12px 16px;}
+.stat-num{font-size:22px;font-weight:800;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.s-ok{color:var(--green);}.s-ng{color:var(--red);}.s-to{color:var(--amber);}
+.result-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.retry-btn{padding:14px;font-size:14px;font-weight:800;font-family:inherit;background:var(--green);color:#fff;border:none;border-radius:var(--r);cursor:pointer;}
+.retry-btn:hover{background:var(--green-d);}
+.back-btn{padding:14px;font-size:14px;font-weight:800;font-family:inherit;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;}
+.back-btn:hover{border-color:var(--green);color:var(--green);}
+.review-title{font-size:14px;font-weight:800;margin-bottom:10px;margin-top:14px;}
+.review-item{background:var(--card);border:1px solid #F09595;border-radius:var(--rs);padding:13px 15px;margin-bottom:8px;}
+.review-item.to{border-color:#FAC775;}
+.r-num{font-size:11px;color:var(--hint);margin-bottom:6px;}
+.r-en{font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.8;}
+.tag{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;margin-right:4px;margin-top:2px;}
+.tag-ng{background:var(--red-l);color:var(--red-deep);}.tag-ok{background:var(--green-l);color:var(--green-deep);}.tag-to{background:var(--amber-l);color:var(--amber-deep);}
+
+
+
+
+
+.set-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.set-card{background:var(--bg);border-radius:var(--rs);padding:12px;}
+.set-lbl{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.set-inp{width:100%;font-size:22px;font-weight:800;color:var(--green);text-align:center;border:none;background:transparent;outline:none;font-family:inherit;}
+.set-inp.red{color:var(--red);}
+.set-hint{font-size:11px;color:var(--muted);text-align:center;margin-bottom:16px;}
+.hist-section{margin-top:24px;border-top:1px solid var(--border);padding-top:16px;}
+.hist-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.hist-ttl{font-size:14px;font-weight:800;}
+.hist-clear{font-size:11px;font-weight:600;color:var(--red);background:none;border:none;cursor:pointer;}
+.hist-empty{font-size:13px;color:var(--hint);text-align:center;padding:16px 0;}
+.hist-item{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.hist-item:hover{border-color:var(--green);}
+.hist-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.hist-left{flex:1;min-width:0;}
+.hist-name{font-size:14px;font-weight:800;margin-bottom:2px;}
+.hist-date{font-size:11px;color:var(--hint);margin-bottom:4px;}
+.hist-score{font-size:17px;font-weight:800;}
+.hist-score.pass{color:var(--green);}.hist-score.fail{color:var(--red);}
+.hist-bar-wrap{width:70px;height:5px;background:#E0E0E0;border-radius:99px;overflow:hidden;margin-top:4px;}
+.hist-bar{height:5px;border-radius:99px;}
+.hist-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap;}
+.hb-pass{background:var(--green-l);color:var(--green-deep);}
+.hb-fail{background:var(--red-l);color:var(--red-deep);}
+.hist-detail{margin-top:10px;border-top:1px solid var(--border);padding-top:10px;display:none;}
+.hist-detail.open{display:block;}
+.hist-range{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.range-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--blue-l);color:var(--blue-deep);}
+.hd-item{background:var(--bg);border-radius:var(--rs);padding:9px 11px;margin-bottom:5px;}
+.hd-item.hd-to{border-left:3px solid var(--amber);}
+.hd-item.hd-ng{border-left:3px solid var(--red);}
+.hd-qnum{font-size:10px;color:var(--hint);margin-bottom:3px;}
+.hd-en{font-size:12px;line-height:1.7;margin-bottom:4px;}
+.hd-tags{display:flex;flex-wrap:wrap;gap:4px;}
+.toggle-txt{font-size:11px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const SECTIONS = {
+  21: [{n:"21번 1-①",t:"g",en:"21번 We are now at a point of [A] genetic, cultural, and environmental power as a species.",blanks:[{l:"[A]",c:["conventional","unprecedented"],a:"unprecedented"}]},
+  {n:"21번 1-②",t:"g",en:"21번 We are now at a point of unprecedented genetic, cultural, and [A] power as a species.",blanks:[{l:"[A]",c:["environmentally","environmental"],a:"environmental"}]},
+  {n:"21번 1-③",t:"g",en:"21번 We [A] to nearly every other person on Earth.",blanks:[{l:"[A]",c:["are linked","link"],a:"are linked"}]},
+  {n:"21번 2-①",t:"g",en:"21번 We are [A] individuals trapped within limited time.",blanks:[{l:"[A]",c:["embodying","embodied"],a:"embodied"}]},
+  {n:"21번 2-②",t:"g",en:"21번 We are embodied individuals [A] within limited time.",blanks:[{l:"[A]",c:["trapping","trapped"],a:"trapped"}]},
+  {n:"21번 2-③",t:"g",en:"21번 We are embodied individuals trapped within [A] time.",blanks:[{l:"[A]",c:["limitless","limited"],a:"limited"}]},
+  {n:"21번 2-④",t:"g",en:"21번 We are also [A] data streams, memories, and influencers.",blanks:[{l:"[A]",c:["networking","networked"],a:"networked"}]},
+  {n:"21번 2-⑤",t:"g",en:"21번 We are part of a [A] humanity.",blanks:[{l:"[A]",c:["smaller","grander"],a:"grander"}]},
+  {n:"21번 3-①",t:"g",en:"21번 Our decisions today [A] far-reaching impacts that place a responsibility on us.",blanks:[{l:"[A]",c:["have","has"],a:"have"}]},
+  {n:"21번 3-②",t:"g",en:"21번 Our decisions today have far-reaching impacts [A] place a responsibility on us.",blanks:[{l:"[A]",c:["that","which"],a:"that"}]},
+  {n:"21번 3-③",t:"g",en:"21번 Our decisions today have far-reaching impacts that [A] a responsibility on us.",blanks:[{l:"[A]",c:["places","place"],a:"place"}]},
+  {n:"21번 3-④",t:"g",en:"21번 Far-reaching impacts place a responsibility on us to become [A] ancestors.",blanks:[{l:"[A]",c:["good","bad"],a:"good"}]},
+  {n:"21번 3-⑤",t:"g",en:"21번 We must take the [A] view and time travel forward to imagine the well-being of billions of people.",blanks:[{l:"[A]",c:["long","short"],a:"long"}]},
+  {n:"21번 3-⑥",t:"g",en:"21번 We must take the long view and time travel [A] to imagine the well-being of billions of people.",blanks:[{l:"[A]",c:["forward","backward"],a:"forward"}]},
+  {n:"21번 3-⑦",t:"g",en:"21번 We imagine the well-being of billions of people [A] lives will be lived in the world we are currently making.",blanks:[{l:"[A]",c:["who","whose"],a:"whose"}]},
+  {n:"21번 3-⑧",t:"g",en:"21번 We imagine the well-being of billions of people whose lives will be lived in the world we are currently [A].",blanks:[{l:"[A]",c:["made","making"],a:"making"}]},
+  {n:"21번 4-①",t:"g",en:"21번 Centuries ago, [A] of the native North American Iroquois people created seven generation stewardship.",blanks:[{l:"[A]",c:["followers","leaders"],a:"leaders"}]},
+  {n:"21번 4-②",t:"g",en:"21번 Leaders of the native North American Iroquois people [A] seven generation stewardship.",blanks:[{l:"[A]",c:["were created","created"],a:"created"}]},
+  {n:"21번 4-③",t:"g",en:"21번 Leaders created seven generation stewardship, [A] people to consider the impact of every decision on their children.",blanks:[{l:"[A]",c:["instructed","instructing"],a:"instructing"}]},
+  {n:"21번 4-④",t:"g",en:"21번 Leaders instructed people to [A] the impact of every decision on their children, seven generations into the future.",blanks:[{l:"[A]",c:["be considered","consider"],a:"consider"}]},
+  {n:"21번 4-⑤",t:"g",en:"21번 Leaders instructed people to consider the impact of every [A] on their children, seven generations into the future.",blanks:[{l:"[A]",c:["decision","decisions"],a:"decision"}]},
+  {n:"21번 5-①",t:"g",en:"21번 In the [A] few decades that Earth is ours, we must not steal the shade from our descendants.",blanks:[{l:"[A]",c:["worthless","precious"],a:"precious"}]},
+  {n:"21번 5-②",t:"g",en:"21번 In the precious few [A] that Earth is ours, we must not steal the shade from our descendants.",blanks:[{l:"[A]",c:["decades","decade"],a:"decades"}]},
+  {n:"21번 5-③",t:"g",en:"21번 [A] we enjoy the gardens planted by our ancestors, we must not steal the shade from our descendants.",blanks:[{l:"[A]",c:["while","during"],a:"while"}]},
+  {n:"21번 5-④",t:"g",en:"21번 While we enjoy the gardens [A] by our ancestors, we must not steal the shade from our descendants.",blanks:[{l:"[A]",c:["planted","planting"],a:"planted"}]},
+  {n:"21번 5-⑤",t:"g",en:"21번 While we enjoy the gardens planted by our [A], we must not steal the shade from our descendants.",blanks:[{l:"[A]",c:["offspring","ancestors"],a:"ancestors"}]},
+  {n:"21번 5-⑥",t:"g",en:"21번 We must not [A] the shade from our descendants.",blanks:[{l:"[A]",c:["steal","be stolen"],a:"steal"}]},],
+  22: [{n:"22번 1-①",t:"g",en:"22번 [A] learned eating behaviors that are formed in early childhood and inborn biological differences, taste preferences can be changed throughout our lives.",blanks:[{l:"[A]",c:["Despite","Although"],a:"Despite"}]},
+  {n:"22번 1-②",t:"g",en:"22번 Despite learned eating behaviors [A] are formed in early childhood and inborn biological differences, taste preferences can be changed.",blanks:[{l:"[A]",c:["what","that"],a:"that"}]},
+  {n:"22번 1-③",t:"g",en:"22번 Despite learned eating behaviors that [A] formed in early childhood and inborn biological differences, taste preferences can be changed.",blanks:[{l:"[A]",c:["is","are"],a:"are"}]},
+  {n:"22번 1-④",t:"g",en:"22번 Despite learned eating behaviors that are formed in early [A] and inborn biological differences, taste preferences can be changed.",blanks:[{l:"[A]",c:["childhood","adulthood"],a:"childhood"}]},
+  {n:"22번 1-⑤",t:"g",en:"22번 Despite learned eating behaviors that are formed in early childhood and inborn [A] differences, taste preferences can be changed.",blanks:[{l:"[A]",c:["biological","biologically"],a:"biological"}]},
+  {n:"22번 1-⑥",t:"g",en:"22번 Despite learned eating behaviors and inborn biological [A], taste preferences can be changed.",blanks:[{l:"[A]",c:["similarities","differences"],a:"differences"}]},
+  {n:"22번 1-⑦",t:"g",en:"22번 Taste preferences can be [A] throughout our lives due to neuroplasticity.",blanks:[{l:"[A]",c:["changed","fixed"],a:"changed"}]},
+  {n:"22번 1-⑧",t:"g",en:"22번 Taste preferences can be changed throughout our lives [A] neuroplasticity, our brain's amazing adaptability.",blanks:[{l:"[A]",c:["due to","because"],a:"due to"}]},
+  {n:"22번 1-⑨",t:"g",en:"22번 There is [A] more flexibility in our food behaviors than most think.",blanks:[{l:"[A]",c:["very","far"],a:"far"}]},
+  {n:"22번 1-⑩",t:"g",en:"22번 Neuroplasticity is our brain's [A] adaptability.",blanks:[{l:"[A]",c:["amazing","amazed"],a:"amazing"}]},
+  {n:"22번 1-⑪",t:"g",en:"22번 There [A] far more flexibility in our food behaviors than most think.",blanks:[{l:"[A]",c:["are","is"],a:"is"}]},
+  {n:"22번 2-①",t:"g",en:"22번 This is [A] news for adventurous eaters who want to expand their dinner menu.",blanks:[{l:"[A]",c:["terrific","terrible"],a:"terrific"}]},
+  {n:"22번 2-②",t:"g",en:"22번 This is terrific news for adventurous eaters [A] want to expand their dinner menu.",blanks:[{l:"[A]",c:["who","whom"],a:"who"}]},
+  {n:"22번 2-③",t:"g",en:"22번 This is terrific news for adventurous eaters who want to [A] their dinner menu.",blanks:[{l:"[A]",c:["expend","expand"],a:"expand"}]},
+  {n:"22번 2-④",t:"g",en:"22번 It's [A] news for those eager to break poor diet habits.",blanks:[{l:"[A]",c:["amazed","amazing"],a:"amazing"}]},
+  {n:"22번 2-⑤",t:"g",en:"22번 It's amazing news for those eager [A] poor diet habits.",blanks:[{l:"[A]",c:["to break","breaking"],a:"to break"}]},
+  {n:"22번 2-⑥",t:"g",en:"22번 It's amazing news for those eager to break [A] diet habits.",blanks:[{l:"[A]",c:["poor","good"],a:"poor"}]},
+  {n:"22번 3-①",t:"g",en:"22번 Just as kids [A] learn to like nutritious foods, so, too, can adults readjust their taste.",blanks:[{l:"[A]",c:["gradual","gradually"],a:"gradually"}]},
+  {n:"22번 3-②",t:"g",en:"22번 Just as kids gradually learn [A] nutritious foods, so, too, can adults readjust their taste.",blanks:[{l:"[A]",c:["to like","liking"],a:"to like"}]},
+  {n:"22번 3-③",t:"g",en:"22번 Just as kids gradually learn to like nutritious foods, so, [A], can adults readjust their taste.",blanks:[{l:"[A]",c:["too","either"],a:"too"}]},
+  {n:"22번 3-④",t:"g",en:"22번 So, too, can adults [A] their taste.",blanks:[{l:"[A]",c:["be readjusted","readjust"],a:"readjust"}]},
+  {n:"22번 4-①",t:"g",en:"22번 Many [A] switch from processed grain foods to whole grain types gradually learn to prefer the nutty flavors.",blanks:[{l:"[A]",c:["which","who"],a:"who"}]},
+  {n:"22번 4-②",t:"g",en:"22번 Many who switch from [A] grain foods like white bread and white rice to whole grain types gradually learn to prefer the nutty flavors.",blanks:[{l:"[A]",c:["processed","whole"],a:"processed"}]},
+  {n:"22번 4-③",t:"g",en:"22번 Many who switch from processed grain foods to whole grain types [A] learn to prefer the nutty flavors and chewy textures.",blanks:[{l:"[A]",c:["gradually","instantly"],a:"gradually"}]},
+  {n:"22번 4-④",t:"g",en:"22번 Many who switch from processed to whole grain types gradually learn [A] the nutty flavors and chewy textures.",blanks:[{l:"[A]",c:["preferring","to prefer"],a:"to prefer"}]},
+  {n:"22번 5-①",t:"g",en:"22번 [A] exposure — and a willingness to change — is the key.",blanks:[{l:"[A]",c:["Repeating","Repeated"],a:"Repeated"}]},
+  {n:"22번 5-②",t:"g",en:"22번 Repeated exposure — and a [A] to change — is the key.",blanks:[{l:"[A]",c:["willingness","reluctance"],a:"willingness"}]},
+  {n:"22번 5-③",t:"g",en:"22번 Repeated exposure — and a willingness to change — [A] the key.",blanks:[{l:"[A]",c:["is","are"],a:"is"}]},],
+  23: [{n:"23번 1-①",t:"g",en:"23번 [A] in the teenage years has been studied by putting young people in situations where they are asked to make a choice.",blanks:[{l:"[A]",c:["Individuality","Conformity"],a:"Conformity"}]},
+  {n:"23번 1-②",t:"g",en:"23번 Conformity in the teenage years has [A] by putting young people in situations where they are asked to make a choice.",blanks:[{l:"[A]",c:["studied","been studied"],a:"been studied"}]},
+  {n:"23번 1-③",t:"g",en:"23번 Conformity in the teenage years has been studied by putting [A] people in situations where they are asked to make a choice.",blanks:[{l:"[A]",c:["old","young"],a:"young"}]},
+  {n:"23번 1-④",t:"g",en:"23번 Conformity has been studied by putting young people in situations [A] they are asked to make a choice.",blanks:[{l:"[A]",c:["which","where"],a:"where"}]},
+  {n:"23번 1-⑤",t:"g",en:"23번 Conformity has been studied by putting young people in situations where they are asked [A] a choice or decision.",blanks:[{l:"[A]",c:["making","to make"],a:"to make"}]},
+  {n:"23번 1-⑥",t:"g",en:"23번 They are asked to make a choice where that [A] to go against what everyone else in the group is saying.",blanks:[{l:"[A]",c:["is appeared","appears"],a:"appears"}]},
+  {n:"23번 1-⑦",t:"g",en:"23번 They are asked to make a choice that appears to go against [A] everyone else in the group is saying.",blanks:[{l:"[A]",c:["which","what"],a:"what"}]},
+  {n:"23번 1-⑧",t:"g",en:"23번 They are asked to make a choice that appears to go against what everyone else in the group is [A].",blanks:[{l:"[A]",c:["hearing","saying"],a:"saying"}]},
+  {n:"23번 2-①",t:"g",en:"23번 The [A] thing about the results of these studies is that conformity is not spread equally across all age groups.",blanks:[{l:"[A]",c:["fascinated","fascinating"],a:"fascinating"}]},
+  {n:"23번 2-②",t:"g",en:"23번 The fascinating thing about the [A] of these studies is that conformity is not spread equally across all age groups.",blanks:[{l:"[A]",c:["causes","results"],a:"results"}]},
+  {n:"23번 2-③",t:"g",en:"23번 The fascinating thing about the results of these studies is [A] conformity is not spread equally across all age groups.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"23번 2-④",t:"g",en:"23번 Conformity is not spread [A] across all age groups.",blanks:[{l:"[A]",c:["equally","unequally"],a:"equally"}]},
+  {n:"23번 3-①",t:"g",en:"23번 The [A] to go along with others reaches a peak around the age of 14.",blanks:[{l:"[A]",c:["willingness","wellness"],a:"willingness"}]},
+  {n:"23번 3-②",t:"g",en:"23번 The willingness to go along with [A] reaches a peak around the age of 14.",blanks:[{l:"[A]",c:["others","other"],a:"others"}]},
+  {n:"23번 3-③",t:"g",en:"23번 The willingness to go along with others [A] a peak around the age of 14.",blanks:[{l:"[A]",c:["reach","reaches"],a:"reaches"}]},
+  {n:"23번 3-④",t:"g",en:"23번 The willingness to go along with others reaches a [A] around the age of 14.",blanks:[{l:"[A]",c:["peak","bottom"],a:"peak"}]},
+  {n:"23번 4-①",t:"g",en:"23번 After that, this tendency [A], so that by 16 or 17, young people are much more able to disagree with the group.",blanks:[{l:"[A]",c:["decreases","increases"],a:"decreases"}]},
+  {n:"23번 4-②",t:"g",en:"23번 By 16 or 17, young people are [A] more able to disagree with the group and to stand up for their own opinion.",blanks:[{l:"[A]",c:["much","very"],a:"much"}]},
+  {n:"23번 4-③",t:"g",en:"23번 By 16 or 17, young people are much more able to [A] with the group and to stand up for their own opinion.",blanks:[{l:"[A]",c:["agree","disagree"],a:"disagree"}]},
+  {n:"23번 5",t:"g",en:"23번 This is an [A] finding.",blanks:[{l:"[A]",c:["unimportant","important"],a:"important"}]},
+  {n:"23번 6-①",t:"g",en:"23번 It demonstrates [A] the influence of the peer group is not the same across all ages.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"23번 6-②",t:"g",en:"23번 It demonstrates that the influence of the peer group is not [A] across all ages.",blanks:[{l:"[A]",c:["the same","different"],a:"the same"}]},
+  {n:"23번 7-①",t:"g",en:"23번 As young people mature, they become [A] resilient, and more able to defend their opinions as individuals.",blanks:[{l:"[A]",c:["less","more"],a:"more"}]},
+  {n:"23번 7-②",t:"g",en:"23번 As young people mature, they become more resilient, and more able to [A] their opinions as individuals.",blanks:[{l:"[A]",c:["defend","offend"],a:"defend"}]},
+  {n:"23번 7-③",t:"g",en:"23번 As young people mature, they become more resilient, and more able to defend their opinions as [A].",blanks:[{l:"[A]",c:["individuals","groups"],a:"individuals"}]},],
+  24: [{n:"24번 1-①",t:"g",en:"24번 Habits aren't [A].",blanks:[{l:"[A]",c:["bad","good"],a:"bad"}]},
+  {n:"24번 1-②",t:"g",en:"24번 We need [A] to survive.",blanks:[{l:"[A]",c:["them","it"],a:"them"}]},
+  {n:"24번 1-③",t:"g",en:"24번 We need them to [A].",blanks:[{l:"[A]",c:["die","survive"],a:"survive"}]},
+  {n:"24번 2-①",t:"g",en:"24번 [A] how the brain uses habits, and how you can work with them, is essential for business.",blanks:[{l:"[A]",c:["Understood","Understanding"],a:"Understanding"}]},
+  {n:"24번 2-②",t:"g",en:"24번 Understanding how the brain [A] habits, and how you can work with them, is essential for business.",blanks:[{l:"[A]",c:["is used","uses"],a:"uses"}]},
+  {n:"24번 2-③",t:"g",en:"24번 Understanding how the brain uses habits, and [A] you can work with them, is essential for business.",blanks:[{l:"[A]",c:["which","how"],a:"how"}]},
+  {n:"24번 2-④",t:"g",en:"24번 Understanding how the brain uses habits, and how you can work with them, [A] essential for business.",blanks:[{l:"[A]",c:["are","is"],a:"is"}]},
+  {n:"24번 2-⑤",t:"g",en:"24번 Understanding how the brain uses habits, and how you can work with them, is [A] for business.",blanks:[{l:"[A]",c:["unnecessary","essential"],a:"essential"}]},
+  {n:"24번 3-①",t:"g",en:"24번 One question to ask [A], are you really trying to break a habit?",blanks:[{l:"[A]",c:["is","are"],a:"is"}]},
+  {n:"24번 3-②",t:"g",en:"24번 Are you really trying to [A] a habit, or would you do better by attaching to another one?",blanks:[{l:"[A]",c:["keep","break"],a:"break"}]},
+  {n:"24번 3-③",t:"g",en:"24번 Would you do [A] by attaching to another one (known as temptation bundling)?",blanks:[{l:"[A]",c:["worse","better"],a:"better"}]},
+  {n:"24번 3-④",t:"g",en:"24번 Would you do better by attaching to [A] one (known as temptation bundling)?",blanks:[{l:"[A]",c:["other","another"],a:"another"}]},
+  {n:"24번 4-①",t:"g",en:"24번 Wharton professor Katy Milkman [A] a research project called Holding the Hunger Games Hostage at the Gym.",blanks:[{l:"[A]",c:["led","was led"],a:"led"}]},
+  {n:"24번 4-②",t:"g",en:"24번 Wharton professor Katy Milkman led a research project [A] Holding the Hunger Games Hostage at the Gym.",blanks:[{l:"[A]",c:["calling","called"],a:"called"}]},
+  {n:"24번 4-③",t:"g",en:"24번 Wharton professor Katy Milkman led a research project called Holding the Hunger Games Hostage at the Gym, [A] participants could only have access to their audio devices while at the gym.",blanks:[{l:"[A]",c:["which","where"],a:"where"}]},
+  {n:"24번 5-①",t:"g",en:"24번 This [A] a tempting habit — listening to that awesome audiobook — and combines it with a habit people would like to build.",blanks:[{l:"[A]",c:["uses","is used"],a:"uses"}]},
+  {n:"24번 5-②",t:"g",en:"24번 This uses a tempting habit — listening to that [A] audiobook — and combines it with a habit people would like to build.",blanks:[{l:"[A]",c:["awful","awesome"],a:"awesome"}]},
+  {n:"24번 5-③",t:"g",en:"24번 This uses a tempting habit and [A] it with a habit people would like to build.",blanks:[{l:"[A]",c:["combine","combines"],a:"combines"}]},
+  {n:"24번 5-④",t:"g",en:"24번 This uses a tempting habit and combines [A] with a habit people would like to build.",blanks:[{l:"[A]",c:["them","it"],a:"it"}]},
+  {n:"24번 5-⑤",t:"g",en:"24번 This combines a tempting habit with a habit people would like to [A], but may otherwise feel forced to put off, like exercising.",blanks:[{l:"[A]",c:["build","break"],a:"build"}]},
+  {n:"24번 5-⑥",t:"g",en:"24번 People may otherwise [A] forced to put off exercising.",blanks:[{l:"[A]",c:["feels","feel"],a:"feel"}]},
+  {n:"24번 5-⑦",t:"g",en:"24번 People may otherwise feel forced [A] off exercising.",blanks:[{l:"[A]",c:["putting","to put"],a:"to put"}]},
+  {n:"24번 6-①",t:"g",en:"24번 The participants [A] devices were held hostage were 51 percent more likely to visit the gym.",blanks:[{l:"[A]",c:["whose","who"],a:"whose"}]},
+  {n:"24번 6-②",t:"g",en:"24번 The participants whose devices [A] held hostage were 51 percent more likely to visit the gym.",blanks:[{l:"[A]",c:["were","was"],a:"were"}]},
+  {n:"24번 6-③",t:"g",en:"24번 The participants whose devices were held hostage were 51 percent [A] likely to visit the gym.",blanks:[{l:"[A]",c:["more","less"],a:"more"}]},
+  {n:"24번 6-④",t:"g",en:"24번 The participants whose devices were held hostage were 51 percent more likely to [A] the gym.",blanks:[{l:"[A]",c:["visit","leave"],a:"visit"}]},
+  {n:"24번 7-①",t:"g",en:"24번 The really [A] thing is what happened after it was over.",blanks:[{l:"[A]",c:["amazing","amazed"],a:"amazing"}]},
+  {n:"24번 7-②",t:"g",en:"24번 The really amazing thing is [A] happened after it was over.",blanks:[{l:"[A]",c:["that","what"],a:"what"}]},
+  {n:"24번 7-③",t:"g",en:"24번 [A] two-thirds opted to pay to have gym-only access for their devices.",blanks:[{l:"[A]",c:["near","nearly"],a:"nearly"}]},
+  {n:"24번 7-④",t:"g",en:"24번 Nearly two-thirds opted [A] to have gym-only access for their devices.",blanks:[{l:"[A]",c:["paying","to pay"],a:"to pay"}]},],
+  29: [{n:"29번 1-①",t:"g",en:"29번 A conceptual model is an [A], usually highly simplified, of how something works.",blanks:[{l:"[A]",c:["exploration","explanation"],a:"explanation"}]},
+  {n:"29번 1-②",t:"g",en:"29번 A conceptual model is an explanation, usually [A] simplified, of how something works.",blanks:[{l:"[A]",c:["high","highly"],a:"highly"}]},
+  {n:"29번 1-③",t:"g",en:"29번 A conceptual model is an explanation, usually highly simplified, of how [A].",blanks:[{l:"[A]",c:["does something work","something works"],a:"something works"}]},
+  {n:"29번 2-①",t:"g",en:"29번 It doesn't have to be [A] or even accurate as long as it is useful.",blanks:[{l:"[A]",c:["incomplete","complete"],a:"complete"}]},
+  {n:"29번 2-②",t:"g",en:"29번 It doesn't have to be complete or even [A] as long as it is useful.",blanks:[{l:"[A]",c:["accurate","accurately"],a:"accurate"}]},
+  {n:"29번 2-③",t:"g",en:"29번 It doesn't have to be complete or even accurate as long as it is [A].",blanks:[{l:"[A]",c:["useful","useless"],a:"useful"}]},
+  {n:"29번 3-①",t:"g",en:"29번 The files, folders, and icons you see [A] on a computer screen help people create the conceptual model of documents and folders inside the computer.",blanks:[{l:"[A]",c:["displaying","displayed"],a:"displayed"}]},
+  {n:"29번 3-②",t:"g",en:"29번 The files, folders, and icons you see displayed on a computer screen [A] people create the conceptual model.",blanks:[{l:"[A]",c:["helps","help"],a:"help"}]},
+  {n:"29번 3-③",t:"g",en:"29번 The files, folders, and icons help people [A] the conceptual model of documents and folders inside the computer.",blanks:[{l:"[A]",c:["creating","create"],a:"create"}]},
+  {n:"29번 3-④",t:"g",en:"29번 The icons help people create the conceptual model of documents and folders [A] the computer.",blanks:[{l:"[A]",c:["inside","outside"],a:"inside"}]},
+  {n:"29번 4-①",t:"g",en:"29번 In fact, there [A] no folders inside the computer — those are effective conceptualizations designed to make it easier to use.",blanks:[{l:"[A]",c:["are","is"],a:"are"}]},
+  {n:"29번 4-②",t:"g",en:"29번 There are no folders inside the computer — those are [A] conceptualizations designed to make it easier to use.",blanks:[{l:"[A]",c:["ineffective","effective"],a:"effective"}]},
+  {n:"29번 4-③",t:"g",en:"29번 Those are effective conceptualizations [A] to make it easier to use.",blanks:[{l:"[A]",c:["designing","designed"],a:"designed"}]},
+  {n:"29번 4-④",t:"g",en:"29번 Those are effective conceptualizations designed to make [A] easier to use.",blanks:[{l:"[A]",c:["them","it"],a:"them"}]},
+  {n:"29번 5",t:"g",en:"29번 Sometimes these depictions can add to the [A], however.",blanks:[{l:"[A]",c:["conclusion","confusion"],a:"confusion"}]},
+  {n:"29번 6-①",t:"g",en:"29번 When [A] e-mail or visiting a website, the material appears to be on the device.",blanks:[{l:"[A]",c:["reading","read"],a:"reading"}]},
+  {n:"29번 6-②",t:"g",en:"29번 When reading e-mail or [A] a website, the material appears to be on the device.",blanks:[{l:"[A]",c:["visiting","to visit"],a:"visiting"}]},
+  {n:"29번 6-③",t:"g",en:"29번 When reading e-mail or visiting a website, the material [A] to be on the device.",blanks:[{l:"[A]",c:["is appeared","appears"],a:"appears"}]},
+  {n:"29번 6-④",t:"g",en:"29번 The material appears to be on the device, for that is [A] it is displayed and used.",blanks:[{l:"[A]",c:["what","where"],a:"where"}]},
+  {n:"29번 7-①",t:"g",en:"29번 In many [A] the actual material is in the cloud, located on some distant machine.",blanks:[{l:"[A]",c:["cases","case"],a:"cases"}]},
+  {n:"29번 7-②",t:"g",en:"29번 In many cases the [A] material is in the cloud, located on some distant machine.",blanks:[{l:"[A]",c:["actual","actually"],a:"actual"}]},
+  {n:"29번 7-③",t:"g",en:"29번 In many cases the actual material is in the cloud, [A] on some distant machine.",blanks:[{l:"[A]",c:["locating","located"],a:"located"}]},
+  {n:"29번 7-④",t:"g",en:"29번 In many cases the actual material is in the cloud, located on some [A] machine.",blanks:[{l:"[A]",c:["distant","close"],a:"distant"}]},
+  {n:"29번 8-①",t:"g",en:"29번 The conceptual model is of one coherent image, whereas it may actually consist of parts, each located on [A] machines.",blanks:[{l:"[A]",c:["similar","different"],a:"different"}]},
+  {n:"29번 8-②",t:"g",en:"29번 The conceptual model may actually consist of parts, each located on different machines [A] could be almost anywhere in the world.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"29번 8-③",t:"g",en:"29번 The conceptual model may actually consist of parts located on different machines that could be [A] anywhere in the world.",blanks:[{l:"[A]",c:["most","almost"],a:"almost"}]},],
+  30: [{n:"30번 1-①",t:"g",en:"30번 The principal transportation mode in the [A] world, even in large cities, is still walking.",blanks:[{l:"[A]",c:["developed","developing"],a:"developing"}]},
+  {n:"30번 1-②",t:"g",en:"30번 The principal transportation mode in the developing world, even in [A] cities, is still walking.",blanks:[{l:"[A]",c:["small","large"],a:"large"}]},
+  {n:"30번 1-③",t:"g",en:"30번 The principal transportation mode in the developing world, even in large cities, [A] still walking because of constraints on the resources needed.",blanks:[{l:"[A]",c:["are","is"],a:"is"}]},
+  {n:"30번 1-④",t:"g",en:"30번 Walking is still the principal mode [A] constraints on the resources needed to operate extensive transit systems.",blanks:[{l:"[A]",c:["because of","because"],a:"because of"}]},
+  {n:"30번 1-⑤",t:"g",en:"30번 There are constraints on the resources needed to operate [A] transit systems.",blanks:[{l:"[A]",c:["limited","extensive"],a:"extensive"}]},
+  {n:"30번 2-①",t:"g",en:"30번 People cover [A] distances on foot every day and expend human energy that they can hardly spare.",blanks:[{l:"[A]",c:["short","long"],a:"long"}]},
+  {n:"30번 2-②",t:"g",en:"30번 People cover long distances on foot every day and [A] human energy that they can hardly spare.",blanks:[{l:"[A]",c:["expend","expand"],a:"expend"}]},
+  {n:"30번 2-③",t:"g",en:"30번 People expend human energy [A] they can hardly spare.",blanks:[{l:"[A]",c:["that","how"],a:"that"}]},
+  {n:"30번 3-①",t:"g",en:"30번 Walking under those conditions [A] an unavoidable burden that consumes productive capability.",blanks:[{l:"[A]",c:["are","is"],a:"is"}]},
+  {n:"30번 3-②",t:"g",en:"30번 Walking under those conditions is an [A] burden that consumes productive capability.",blanks:[{l:"[A]",c:["avoidable","unavoidable"],a:"unavoidable"}]},
+  {n:"30번 3-③",t:"g",en:"30번 Walking under those conditions is an unavoidable burden that [A] productive capability.",blanks:[{l:"[A]",c:["consume","consumes"],a:"consumes"}]},
+  {n:"30번 4-①",t:"g",en:"30번 In North America and Western Europe, however, the [A] and policies are just the opposite.",blanks:[{l:"[A]",c:["attitude","altitude"],a:"attitude"}]},
+  {n:"30번 4-②",t:"g",en:"30번 In North America and Western Europe, the attitude and policies [A] just the opposite.",blanks:[{l:"[A]",c:["are","is"],a:"are"}]},
+  {n:"30번 4-③",t:"g",en:"30번 In North America and Western Europe, the attitude and policies are just the [A]: walking is efficient, healthful, and natural.",blanks:[{l:"[A]",c:["opposite","same"],a:"opposite"}]},
+  {n:"30번 4-④",t:"g",en:"30번 Walking is [A], healthful, and natural.",blanks:[{l:"[A]",c:["inefficient","efficient"],a:"efficient"}]},
+  {n:"30번 4-⑤",t:"g",en:"30번 Walking is efficient, healthful, and [A].",blanks:[{l:"[A]",c:["natural","naturally"],a:"natural"}]},
+  {n:"30번 5-①",t:"g",en:"30번 We should do [A] of it — almost everybody agrees.",blanks:[{l:"[A]",c:["more","less"],a:"more"}]},
+  {n:"30번 5-②",t:"g",en:"30번 We should do more of [A] — almost everybody agrees.",blanks:[{l:"[A]",c:["them","it"],a:"it"}]},
+  {n:"30번 5-③",t:"g",en:"30번 We should do more of it — almost everybody [A].",blanks:[{l:"[A]",c:["disagrees","agrees"],a:"agrees"}]},
+  {n:"30번 5-④",t:"g",en:"30번 Some of the current trends should [A].",blanks:[{l:"[A]",c:["reverse","be reversed"],a:"be reversed"}]},
+  {n:"30번 6-①",t:"g",en:"30번 Among the most popular exercise [A] in health clubs and in homes are treadmills that simulate walking.",blanks:[{l:"[A]",c:["machine","machines"],a:"machines"}]},
+  {n:"30번 6-②",t:"g",en:"30번 Among the most popular exercise machines in health clubs and in homes [A] treadmills that simulate walking.",blanks:[{l:"[A]",c:["is","are"],a:"are"}]},
+  {n:"30번 6-③",t:"g",en:"30번 Among the most popular exercise machines in health clubs are treadmills that [A] walking.",blanks:[{l:"[A]",c:["simulate","are simulated"],a:"simulate"}]},
+  {n:"30번 6-④",t:"g",en:"30번 Treadmills simulate walking, [A] could be otherwise accomplished with a transport purpose on the street.",blanks:[{l:"[A]",c:["that","which"],a:"which"}]},
+  {n:"30번 6-⑤",t:"g",en:"30번 Treadmills simulate walking, which could be otherwise [A] with a transport purpose on the street.",blanks:[{l:"[A]",c:["accomplished","accomplishing"],a:"accomplished"}]},],
+  31: [{n:"31번 1-①",t:"g",en:"31번 Just like how [A] rooms in your home can cause anxiety when filled with too much stuff, the same is true for kids.",blanks:[{l:"[A]",c:["another","other"],a:"other"}]},
+  {n:"31번 1-②",t:"g",en:"31번 Just like how other rooms in your home can cause [A] when filled with too much stuff, the same is true for kids.",blanks:[{l:"[A]",c:["anxiety","anxious"],a:"anxiety"}]},
+  {n:"31번 1-③",t:"g",en:"31번 Just like how other rooms in your home can cause anxiety when [A] with too much stuff, the same is true for kids.",blanks:[{l:"[A]",c:["filled","filling"],a:"filled"}]},
+  {n:"31번 1-④",t:"g",en:"31번 Just like how other rooms in your home can cause anxiety when filled with too much stuff, the [A] is true for kids.",blanks:[{l:"[A]",c:["same","opposite"],a:"same"}]},
+  {n:"31번 2-①",t:"g",en:"31번 If the play space [A] every single toy that has ever been purchased for them since birth, they may feel overwhelmed.",blanks:[{l:"[A]",c:["is housed","houses"],a:"houses"}]},
+  {n:"31번 2-②",t:"g",en:"31번 If the play space houses every single toy that [A] ever been purchased for them since birth, they may feel overwhelmed.",blanks:[{l:"[A]",c:["have","has"],a:"has"}]},
+  {n:"31번 2-③",t:"g",en:"31번 If the play space houses every single toy that has ever been [A] for them since birth, they may feel overwhelmed.",blanks:[{l:"[A]",c:["purchasing","purchased"],a:"purchased"}]},
+  {n:"31번 2-④",t:"g",en:"31번 They may not be able to [A] their feelings, but they can feel overwhelmed by so much stuff.",blanks:[{l:"[A]",c:["express","impress"],a:"express"}]},
+  {n:"31번 2-⑤",t:"g",en:"31번 They may not be able to express their feelings, but they can feel [A] by so much stuff.",blanks:[{l:"[A]",c:["overwhelming","overwhelmed"],a:"overwhelmed"}]},
+  {n:"31번 2-⑥",t:"g",en:"31번 They can feel overwhelmed by so [A] stuff.",blanks:[{l:"[A]",c:["much","little"],a:"much"}]},
+  {n:"31번 3-①",t:"g",en:"31번 This reminds us of [A] in their closets packed full of clothes and think, I have nothing to wear.",blanks:[{l:"[A]",c:["how do women look","how women look"],a:"how women look"}]},
+  {n:"31번 3-②",t:"g",en:"31번 This reminds us of how women look in their closets [A] full of clothes and think, I have nothing to wear.",blanks:[{l:"[A]",c:["pack","packed"],a:"packed"}]},
+  {n:"31번 3-③",t:"g",en:"31번 This reminds us of how women look in their closets packed full of clothes and think, I have [A] to wear.",blanks:[{l:"[A]",c:["something","nothing"],a:"nothing"}]},
+  {n:"31번 4-①",t:"g",en:"31번 Revision helps everyone [A] what they have and use what they own.",blanks:[{l:"[A]",c:["seeing","see"],a:"see"}]},
+  {n:"31번 4-②",t:"g",en:"31번 Revision helps everyone see what they have and use [A] they own.",blanks:[{l:"[A]",c:["that","what"],a:"what"}]},
+  {n:"31번 5-①",t:"g",en:"31번 When there's too [A] to see, too much to step over, and too much input, kids have a hard time making a choice.",blanks:[{l:"[A]",c:["little","much"],a:"much"}]},
+  {n:"31번 5-②",t:"g",en:"31번 When there's too much to see, too much [A] over, and too much input, kids have a hard time making a choice.",blanks:[{l:"[A]",c:["to step","stepping"],a:"to step"}]},
+  {n:"31번 5-③",t:"g",en:"31번 When there's too much to see, too much to step over, and too much input, kids have a hard time [A] a choice.",blanks:[{l:"[A]",c:["to make","making"],a:"making"}]},
+  {n:"31번 6-①",t:"g",en:"31번 Streamlining a play space [A] so important.",blanks:[{l:"[A]",c:["is","are"],a:"is"}]},
+  {n:"31번 6-②",t:"g",en:"31번 Streamlining a play space is so [A].",blanks:[{l:"[A]",c:["unimportant","important"],a:"important"}]},
+  {n:"31번 7-①",t:"g",en:"31번 You want your kids [A] inspired and imaginative in the room — not overcome with indecision.",blanks:[{l:"[A]",c:["feeling","to feel"],a:"to feel"}]},
+  {n:"31번 7-②",t:"g",en:"31번 You want your kids to feel [A] and imaginative in the room — not overcome with indecision.",blanks:[{l:"[A]",c:["inspiring","inspired"],a:"inspired"}]},
+  {n:"31번 7-③",t:"g",en:"31번 You want your kids to feel inspired and [A] in the room — not overcome with indecision.",blanks:[{l:"[A]",c:["unimaginative","imaginative"],a:"imaginative"}]},
+  {n:"31번 7-④",t:"g",en:"31번 You want your kids to feel inspired and imaginative in the room — not overcome with [A].",blanks:[{l:"[A]",c:["indecision","decision"],a:"indecision"}]},],
+  32: [{n:"32번 1-①",t:"g",en:"32번 Students often [A] familiarity with true mastery, creating a dangerous illusion of competence.",blanks:[{l:"[A]",c:["mistake","are mistaken"],a:"mistake"}]},
+  {n:"32번 1-②",t:"g",en:"32번 Students often mistake familiarity with true mastery, [A] a dangerous illusion of competence.",blanks:[{l:"[A]",c:["creating","created"],a:"creating"}]},
+  {n:"32번 1-③",t:"g",en:"32번 Recognizing information [A] like genuine knowledge, but they struggle when asked to recall or apply it independently.",blanks:[{l:"[A]",c:["feel","feels"],a:"feels"}]},
+  {n:"32번 1-④",t:"g",en:"32번 They struggle when [A] to recall or apply it independently.",blanks:[{l:"[A]",c:["asking","asked"],a:"asked"}]},
+  {n:"32번 1-⑤",t:"g",en:"32번 They struggle when asked to recall or apply [A] independently.",blanks:[{l:"[A]",c:["it","them"],a:"it"}]},
+  {n:"32번 2-①",t:"g",en:"32번 This cognitive bias, [A] by passive study methods, leads learners to overestimate their understanding.",blanks:[{l:"[A]",c:["strengthened","strength"],a:"strengthened"}]},
+  {n:"32번 2-②",t:"g",en:"32번 This cognitive bias, strengthened by [A] study methods, leads learners to overestimate their understanding.",blanks:[{l:"[A]",c:["passive","active"],a:"passive"}]},
+  {n:"32번 2-③",t:"g",en:"32번 This cognitive bias, strengthened by passive study methods, [A] learners to overestimate their understanding.",blanks:[{l:"[A]",c:["lead","leads"],a:"leads"}]},
+  {n:"32번 2-④",t:"g",en:"32번 This cognitive bias leads learners [A] their understanding.",blanks:[{l:"[A]",c:["to overestimate","overestimating"],a:"to overestimate"}]},
+  {n:"32번 3-①",t:"g",en:"32번 Teaching materials (even [A] or imaginatively) actively counter this illusion.",blanks:[{l:"[A]",c:["informally","informal"],a:"informally"}]},
+  {n:"32번 3-②",t:"g",en:"32번 Teaching materials actively [A] this illusion by requiring deep processing, active recall, structured organization.",blanks:[{l:"[A]",c:["counter","counters"],a:"counters"}]},
+  {n:"32번 3-③",t:"g",en:"32번 Teaching materials counter this illusion by requiring deep processing, [A] recall, structured organization.",blanks:[{l:"[A]",c:["actively","active"],a:"active"}]},
+  {n:"32번 3-④",t:"g",en:"32번 Teaching materials counter this illusion by requiring deep processing, active recall, structured organization, and [A] gaps in knowledge.",blanks:[{l:"[A]",c:["revealing","reveal"],a:"revealing"}]},
+  {n:"32번 4-①",t:"g",en:"32번 It introduces powerful methods like teaching [A] students, peer-teaching in study groups, employing the Feynman Technique.",blanks:[{l:"[A]",c:["real","imaginary"],a:"imaginary"}]},
+  {n:"32번 4-②",t:"g",en:"32번 It introduces powerful methods like teaching imaginary students, peer-teaching in study groups, [A] the Feynman Technique.",blanks:[{l:"[A]",c:["employing","employed"],a:"employing"}]},
+  {n:"32번 4-③",t:"g",en:"32번 It introduces powerful methods including [A] explanations for others.",blanks:[{l:"[A]",c:["write","writing"],a:"writing"}]},
+  {n:"32번 5-①",t:"g",en:"32번 Ultimately, [A] the teacher mindset transforms surface familiarity into real mastery.",blanks:[{l:"[A]",c:["adapting","adopting"],a:"adopting"}]},
+  {n:"32번 5-②",t:"g",en:"32번 Adopting the teacher mindset transforms surface familiarity into [A] mastery.",blanks:[{l:"[A]",c:["real","fake"],a:"real"}]},
+  {n:"32번 5-③",t:"g",en:"32번 Adopting the teacher mindset transforms surface familiarity into real mastery, [A] and filling gaps in knowledge.",blanks:[{l:"[A]",c:["exposed","exposing"],a:"exposing"}]},
+  {n:"32번 5-④",t:"g",en:"32번 Adopting the teacher mindset ensures solid, [A] understanding.",blanks:[{l:"[A]",c:["unreliable","reliable"],a:"reliable"}]},],
+  33: [{n:"33번 1-①",t:"g",en:"33번 From around 3000 BC, the Sumerian officials would [A] their lists of goods on clay tablets.",blanks:[{l:"[A]",c:["mark","erase"],a:"mark"}]},
+  {n:"33번 1-②",t:"g",en:"33번 From around 3000 BC, the Sumerian officials would mark their lists of [A] on clay tablets.",blanks:[{l:"[A]",c:["goods","good"],a:"goods"}]},
+  {n:"33번 2-①",t:"g",en:"33번 If they wanted [A] five fish, they would mark five pictures of a fish.",blanks:[{l:"[A]",c:["to record","recording"],a:"to record"}]},
+  {n:"33번 2-②",t:"g",en:"33번 If they wanted to record five fish, they [A] mark five pictures of a fish.",blanks:[{l:"[A]",c:["would","will"],a:"would"}]},
+  {n:"33번 2-③",t:"g",en:"33번 If they wanted to record five fish, they would [A] five pictures of a fish.",blanks:[{l:"[A]",c:["mark","be marked"],a:"mark"}]},
+  {n:"33번 3-①",t:"g",en:"33번 Their first great [A] leap came from separating the number from the object they were counting.",blanks:[{l:"[A]",c:["intellectual","intellectually"],a:"intellectual"}]},
+  {n:"33번 3-②",t:"g",en:"33번 Their first great intellectual leap came from [A] the number from the object they were counting.",blanks:[{l:"[A]",c:["being separated","separating"],a:"separating"}]},
+  {n:"33번 3-③",t:"g",en:"33번 Their first great intellectual leap came from separating the number from the object they were [A].",blanks:[{l:"[A]",c:["counting","counted"],a:"counting"}]},
+  {n:"33번 4-①",t:"g",en:"33번 In other words, they would [A] five fish with a numeral for the number five alongside a symbol for the fish.",blanks:[{l:"[A]",c:["represent","be represented"],a:"represent"}]},
+  {n:"33번 4-②",t:"g",en:"33번 They would represent five fish with a numeral for the number five alongside a [A] for the fish.",blanks:[{l:"[A]",c:["symbol","symptom"],a:"symbol"}]},
+  {n:"33번 5-①",t:"g",en:"33번 If they wanted to [A] five of something else, they realized they could keep the same numeral.",blanks:[{l:"[A]",c:["subscribe","describe"],a:"describe"}]},
+  {n:"33번 5-②",t:"g",en:"33번 If they wanted to describe five of something else, they realized they could keep the [A] numeral.",blanks:[{l:"[A]",c:["same","opposite"],a:"same"}]},
+  {n:"33번 5-③",t:"g",en:"33번 They realized they could keep the same numeral and [A] the object symbol for a cow, or a jar of oil.",blanks:[{l:"[A]",c:["trade","trades"],a:"trade"}]},
+  {n:"33번 5-④",t:"g",en:"33번 They could trade the object symbol for a cow, or a jar of oil, or [A] else they were interested in.",blanks:[{l:"[A]",c:["wherever","whatever"],a:"whatever"}]},
+  {n:"33번 6-①",t:"g",en:"33번 The Sumerians [A] the idea of an emancipated number, existing in its own right.",blanks:[{l:"[A]",c:["had been developed","had developed"],a:"had developed"}]},
+  {n:"33번 6-②",t:"g",en:"33번 The Sumerians had developed the idea of an emancipated number, [A] in its own right.",blanks:[{l:"[A]",c:["exist","existing"],a:"existing"}]},
+  {n:"33번 6-③",t:"g",en:"33번 The Sumerians had developed the idea of an emancipated number, existing in its own right and [A] of whatever it is being used to count.",blanks:[{l:"[A]",c:["dependent","independent"],a:"independent"}]},
+  {n:"33번 6-④",t:"g",en:"33번 The emancipated number is independent of whatever it [A] to count.",blanks:[{l:"[A]",c:["is using","is being used"],a:"is being used"}]},
+  {n:"33번 7-①",t:"g",en:"33번 [A] is easy to take the emancipated number for granted as it is so deeply set into modern thought.",blanks:[{l:"[A]",c:["That","It"],a:"It"}]},
+  {n:"33번 7-②",t:"g",en:"33번 It is [A] to take the emancipated number for granted as it is so deeply set into modern thought.",blanks:[{l:"[A]",c:["easy","hard"],a:"easy"}]},
+  {n:"33번 7-③",t:"g",en:"33번 The emancipated number is so deeply set into [A] thought.",blanks:[{l:"[A]",c:["ancient","modern"],a:"modern"}]},
+  {n:"33번 7-④",t:"g",en:"33번 To the earliest civilizations it was [A] new and extremely powerful.",blanks:[{l:"[A]",c:["intellectual","intellectually"],a:"intellectually"}]},
+  {n:"33번 7-⑤",t:"g",en:"33번 To the earliest civilizations the emancipated number was intellectually new and extremely [A].",blanks:[{l:"[A]",c:["powerful","powerless"],a:"powerful"}]},],
+  26: [{n:"26번 26번 1",t:"g",en:"26번 Dennis William Sciama [A] in Manchester, England, in 1926.",blanks:[{l:"[A]",c:["born","was born"],a:"was born"}]},
+  {n:"26번 26번 2",t:"g",en:"26번 He [A] an education in mathematics and physics at Malvern College.",blanks:[{l:"[A]",c:["received","was received"],a:"received"}]},
+  {n:"26번 26번 3-①",t:"g",en:"26번 Despite his father's wish for him [A] over the family business, Sciama chose to continue pursuing his academic career.",blanks:[{l:"[A]",c:["taking","to take"],a:"to take"}]},
+  {n:"26번 26번 3-②",t:"g",en:"26번 Despite his father's wish for him to take over the family business, Sciama chose to [A] pursuing his academic career.",blanks:[{l:"[A]",c:["abandon","continue"],a:"continue"}]},
+  {n:"26번 26번 4-①",t:"g",en:"26번 After [A] a doctoral degree in physics from the University of Cambridge in 1953, he became famous for his research on the universe.",blanks:[{l:"[A]",c:["earning","being earned"],a:"earning"}]},
+  {n:"26번 26번 4-②",t:"g",en:"26번 After earning a doctoral degree in physics from the University of Cambridge in 1953, he became [A] for his research on the universe.",blanks:[{l:"[A]",c:["famous","famously"],a:"famous"}]},
+  {n:"26번 26번 5-①",t:"g",en:"26번 Early in his career, Sciama [A] the steady-state theory, which argued that the universe had no beginning.",blanks:[{l:"[A]",c:["refuted","supported"],a:"supported"}]},
+  {n:"26번 26번 5-②",t:"g",en:"26번 Early in his career, Sciama supported the steady-state theory, [A] argued that the universe had no beginning.",blanks:[{l:"[A]",c:["which","that"],a:"which"}]},
+  {n:"26번 26번 5-③",t:"g",en:"26번 Sciama supported the steady-state theory, which argued [A] the universe had no beginning.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"26번 26번 6-①",t:"g",en:"26번 When new evidence against the theory [A] in the 1960s, he changed his view and accepted the Big Bang model.",blanks:[{l:"[A]",c:["appeared","was appeared"],a:"appeared"}]},
+  {n:"26번 26번 6-②",t:"g",en:"26번 When new evidence against the theory appeared in the 1960s, he changed his view and [A] the Big Bang model.",blanks:[{l:"[A]",c:["accepted","rejected"],a:"accepted"}]},
+  {n:"26번 26번 7",t:"g",en:"26번 In 1991, he was [A] the Guthrie Medal for outstanding contributions to experimental physics by the British Institute of Physics.",blanks:[{l:"[A]",c:["awarding","awarded"],a:"awarded"}]},],
+  34: [{n:"34번 34번 1-①",t:"g",en:"34번 Such artificial 'pause fillers' may help [A] a more natural-sounding cadence in machine-generated speech patterns.",blanks:[{l:"[A]",c:["producing","to produce"],a:"to produce"}]},
+  {n:"34번 34번 1-②",t:"g",en:"34번 Such artificial 'pause fillers' may help to produce a more natural-sounding cadence and so [A] to convince the AI's human interlocutors that they are engaging with another human.",blanks:[{l:"[A]",c:["help","helping"],a:"help"}]},
+  {n:"34번 34번 1-③",t:"g",en:"34번 Such artificial 'pause fillers' may help to produce a more natural-sounding cadence and so help [A] the AI's human interlocutors that they are engaging with another human.",blanks:[{l:"[A]",c:["convincing","to convince"],a:"to convince"}]},
+  {n:"34번 34번 1-④",t:"g",en:"34번 Such artificial 'pause fillers' help to convince the AI's human interlocutors [A] they are engaging with another human.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"34번 34번 2-①",t:"g",en:"34번 AI's 'humanity' of silence [A] in these contexts not least because a short period of silence is likely to be interpreted as a 'pause for thought'.",blanks:[{l:"[A]",c:["emerges","is emerged"],a:"emerges"}]},
+  {n:"34번 34번 2-②",t:"g",en:"34번 A short period of silence is likely [A] interpreted as a 'pause for thought'.",blanks:[{l:"[A]",c:["being","to be"],a:"to be"}]},
+  {n:"34번 34번 2-③",t:"g",en:"34번 A short period of silence is likely to be [A] as a 'pause for thought'.",blanks:[{l:"[A]",c:["interpreting","interpreted"],a:"interpreted"}]},
+  {n:"34번 34번 2-④",t:"g",en:"34번 A short period of silence is likely to be interpreted as a 'pause for thought', therefore [A] the illusion that the machine is 'thinking' before responding.",blanks:[{l:"[A]",c:["reinforcing","weakening"],a:"reinforcing"}]},
+  {n:"34번 34번 2-⑤",t:"g",en:"34번 This reinforces the illusion [A] the machine is 'thinking' before responding, just as a human might.",blanks:[{l:"[A]",c:["that","whose"],a:"that"}]},
+  {n:"34번 34번 3-①",t:"g",en:"34번 [A], the technical issues flagged in AI's poor handling of higher duration and frequency silences are both significant.",blanks:[{l:"[A]",c:["Therefore","However"],a:"However"}]},
+  {n:"34번 34번 3-②",t:"g",en:"34번 The technical issues [A] in AI's poor handling of higher duration and frequency silences are both significant.",blanks:[{l:"[A]",c:["flagging","flagged"],a:"flagged"}]},
+  {n:"34번 34번 3-③",t:"g",en:"34번 The machine inference [A] silence can be filled with relevant sounds in some conversational situations is significant.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"34번 34번 3-④",t:"g",en:"34번 The machine inference that silence can be [A] with relevant sounds in some conversational situations is significant.",blanks:[{l:"[A]",c:["filling","filled"],a:"filled"}]},
+  {n:"34번 34번 3-⑤",t:"g",en:"34번 The technical issues and the machine inference [A] both significant.",blanks:[{l:"[A]",c:["is","are"],a:"are"}]},
+  {n:"34번 34번 4-①",t:"g",en:"34번 The AI may be [A] to recognise silence not as an absence but as meaningful data.",blanks:[{l:"[A]",c:["starting","started"],a:"starting"}]},
+  {n:"34번 34번 4-②",t:"g",en:"34번 The AI may be starting to recognise silence not as a(n) [A] but as meaningful data.",blanks:[{l:"[A]",c:["absence","presence"],a:"absence"}]},
+  {n:"34번 34번 5-①",t:"g",en:"34번 Yet the AI's confusion when [A] with substantial silences indicate the AI's continuing preferences for sound over silence.",blanks:[{l:"[A]",c:["presenting","presented"],a:"presented"}]},
+  {n:"34번 34번 5-②",t:"g",en:"34번 Yet the AI's understanding [A] short break tags are equivalent to vocal markers such as 'uh's' and 'ah's' indicate the AI's continuing preferences.",blanks:[{l:"[A]",c:["what","that"],a:"that"}]},],
+  35: [{n:"35번 35번 1-①",t:"g",en:"35번 Standardization of information was an effect of printing; since it [A] exact reproduction of information in a way that manuscript copying did not.",blanks:[{l:"[A]",c:["allowed","prevented"],a:"allowed"}]},
+  {n:"35번 35번 1-②",t:"g",en:"35번 Printing allowed exact reproduction of information in a way [A] manuscript copying did not.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"35번 35번 1-③",t:"g",en:"35번 Printing allowed exact reproduction of information in a way that manuscript copying [A] not.",blanks:[{l:"[A]",c:["was","did"],a:"did"}]},
+  {n:"35번 35번 2",t:"g",en:"35번 This is evident in the contrast between the travel logs of Marco Polo and [A] of Christopher Columbus.",blanks:[{l:"[A]",c:["that","those"],a:"those"}]},
+  {n:"35번 35번 3-①",t:"g",en:"35번 After his return from China in 1295, Polo's narrative was [A] in about 150 different manuscripts.",blanks:[{l:"[A]",c:["copying","copied"],a:"copied"}]},
+  {n:"35번 35번 3-②",t:"g",en:"35번 Polo's narrative was copied in about 150 different manuscripts, with so many differences [A] we're not sure which version is authentic.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"35번 35번 4-①",t:"g",en:"35번 In contrast, there [A] only one version of Christopher Columbus's letters about the exploration of the Caribbean in the 1490s.",blanks:[{l:"[A]",c:["is","are"],a:"is"}]},
+  {n:"35번 35번 4-②",t:"g",en:"35번 Columbus's letters were [A] in printed form and widely distributed at the time they were written.",blanks:[{l:"[A]",c:["fixed","unfixed"],a:"fixed"}]},
+  {n:"35번 35번 4-③",t:"g",en:"35번 Columbus's letters were fixed in printed form and widely [A] at the time they were written.",blanks:[{l:"[A]",c:["distributing","distributed"],a:"distributed"}]},
+  {n:"35번 35번 5-①",t:"g",en:"35번 So the certainty of accuracy was a way [A] printing was an improvement over the old oral-manuscript culture.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"35번 35번 5-②",t:"g",en:"35번 So the certainty of accuracy was a way that printing was a(n) [A] the old oral-manuscript culture.",blanks:[{l:"[A]",c:["improvement over","regression from"],a:"improvement over"}]},],
+  36: [{n:"36번 36번 1",t:"g",en:"36번 Archaeological evidence suggests that various crops were [A] as early as 9500 BC in the Levant.",blanks:[{l:"[A]",c:["cultivating","being cultivated"],a:"being cultivated"}]},
+  {n:"36번 36번 2",t:"g",en:"36번 Over the millennia, continuous innovations have boosted agricultural productivity while [A] manual labor.",blanks:[{l:"[A]",c:["reducing","reduced"],a:"reducing"}]},
+  {n:"36번 36번 3",t:"g",en:"36번 However, the [A] global population will always demand more food.",blanks:[{l:"[A]",c:["declining","growing"],a:"growing"}]},
+  {n:"36번 36번 4-①",t:"g",en:"36번 It is projected that by 2050, the world's population will [A] to 9.7 billion.",blanks:[{l:"[A]",c:["increase","decrease"],a:"increase"}]},
+  {n:"36번 36번 4-②",t:"g",en:"36번 The world's population will increase to 9.7 billion, [A] will require global food production to rise by at least 70%.",blanks:[{l:"[A]",c:["which","that"],a:"which"}]},
+  {n:"36번 36번 4-③",t:"g",en:"36번 Global food production will be required [A] by at least 70% to meet demand.",blanks:[{l:"[A]",c:["rise","to rise"],a:"to rise"}]},
+  {n:"36번 36번 4-④",t:"g",en:"36번 Global food production must rise by at least 70% to [A] demand.",blanks:[{l:"[A]",c:["meet","meeting"],a:"meet"}]},
+  {n:"36번 36번 5",t:"g",en:"36번 Only a small portion of the Earth's surface [A] suitable for farming due to limitations such as climate, topography, soil quality, and technology.",blanks:[{l:"[A]",c:["is","are"],a:"is"}]},
+  {n:"36번 36번 6",t:"g",en:"36번 Political and economic factors, including land ownership patterns, environmental laws, and population density, also [A] agricultural land use.",blanks:[{l:"[A]",c:["influence","influences"],a:"influence"}]},
+  {n:"36번 36번 7-①",t:"g",en:"36번 In fact, the amount of land used for agriculture [A] been declining.",blanks:[{l:"[A]",c:["have","has"],a:"has"}]},
+  {n:"36번 36번 7-②",t:"g",en:"36번 In fact, the amount of land used for agriculture has been [A].",blanks:[{l:"[A]",c:["raising","declining"],a:"declining"}]},
+  {n:"36번 36번 8",t:"g",en:"36번 In 2013, around 18.6 million square miles was [A] for food production, compared to 19.5 million square miles in 1991.",blanks:[{l:"[A]",c:["using","used"],a:"used"}]},],
+  37: [{n:"37번 37번 1-①",t:"g",en:"37번 If you are going to compare languages, it helps [A] with something that you are confident you can find in all languages.",blanks:[{l:"[A]",c:["starting","to start"],a:"to start"}]},
+  {n:"37번 37번 1-②",t:"g",en:"37번 It helps to start with something [A] you are confident you can find in all languages.",blanks:[{l:"[A]",c:["whose","that"],a:"that"}]},
+  {n:"37번 37번 2",t:"g",en:"37번 [A] for example signs or words for mother and father.",blanks:[{l:"[A]",c:["Take","Taking"],a:"Take"}]},
+  {n:"37번 37번 3",t:"g",en:"37번 If we add [A] family relationships to this category — son, grandmother, aunt, brother-in-law, cousin — we are defining the category of kinship terminology.",blanks:[{l:"[A]",c:["another","other"],a:"other"}]},
+  {n:"37번 37번 4",t:"g",en:"37번 Comparative typological studies of kinship terminology have discovered [A] languages have labels for some but not all family relationships.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"37번 37번 5-①",t:"g",en:"37번 The probability [A] a specific kin relationship has a label is predictable based on the other kinship terms in the language.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"37번 37번 5-②",t:"g",en:"37번 The probability that a specific kin relationship has a label [A] predictable based on the other kinship terms in the language.",blanks:[{l:"[A]",c:["is","are"],a:"is"}]},
+  {n:"37번 37번 5-③",t:"g",en:"37번 The probability that a specific kin relationship has a label is [A] based on the other kinship terms in the language.",blanks:[{l:"[A]",c:["predictable","unpredictable"],a:"predictable"}]},
+  {n:"37번 37번 6-①",t:"g",en:"37번 [A], all languages have a core set of kinship terms — like mother and father.",blanks:[{l:"[A]",c:["In addition","For example"],a:"For example"}]},
+  {n:"37번 37번 6-②",t:"g",en:"37번 For example, all languages [A] a core set of kinship terms — like mother and father.",blanks:[{l:"[A]",c:["have","are had"],a:"have"}]},
+  {n:"37번 37번 7-①",t:"g",en:"37번 [A], terms for less central category members are often built up from the core terms — like mother-in-law and step-father.",blanks:[{l:"[A]",c:["By contrast","For instance"],a:"By contrast"}]},
+  {n:"37번 37번 7-②",t:"g",en:"37번 By contrast, terms for less central category members [A] often built up from the core terms.",blanks:[{l:"[A]",c:["is","are"],a:"are"}]},
+  {n:"37번 37번 7-③",t:"g",en:"37번 By contrast, terms for less central category members are often [A] up from the core terms — like mother-in-law and step-father.",blanks:[{l:"[A]",c:["building","built"],a:"built"}]},
+  {n:"37번 37번 8-①",t:"g",en:"37번 We can ask what kinship relationships are typically [A] with core terminology.",blanks:[{l:"[A]",c:["expressing","expressed"],a:"expressed"}]},
+  {n:"37번 37번 8-②",t:"g",en:"37번 We can ask what relationships are [A] by modifying the core terminology.",blanks:[{l:"[A]",c:["expressing","expressed"],a:"expressed"}]},
+  {n:"37번 37번 8-③",t:"g",en:"37번 We can ask what relationships are expressed by [A] the core terminology.",blanks:[{l:"[A]",c:["modifying","being modified"],a:"modifying"}]},],
+  38: [{n:"38번 38번 1-①",t:"g",en:"38번 There [A] several ways that participants in a make-believe can communicate things about the fictional world to other participants.",blanks:[{l:"[A]",c:["is","are"],a:"are"}]},
+  {n:"38번 38번 1-②",t:"g",en:"38번 There are several ways [A] participants in a make-believe can communicate things about the fictional world.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"38번 38번 1-③",t:"g",en:"38번 Participants can communicate things about the fictional world to [A] participants.",blanks:[{l:"[A]",c:["another","other"],a:"other"}]},
+  {n:"38번 38번 2-①",t:"g",en:"38번 Sometimes these messages are [A] naturally as a result of full participation in the fictional world.",blanks:[{l:"[A]",c:["emitting","emitted"],a:"emitted"}]},
+  {n:"38번 38번 2-②",t:"g",en:"38번 Something [A] by a player while in character communicates fictional things about that world.",blanks:[{l:"[A]",c:["saying","said"],a:"said"}]},
+  {n:"38번 38번 2-③",t:"g",en:"38번 Something said or [A] by a player while in character communicates fictional things about that world.",blanks:[{l:"[A]",c:["doing","done"],a:"done"}]},
+  {n:"38번 38번 2-④",t:"g",en:"38번 Something said or done by a player communicates some things [A] are fictional of that world.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"38번 38번 2-⑤",t:"g",en:"38번 Something said or done by a player communicates some things that [A] fictional of that world.",blanks:[{l:"[A]",c:["is","are"],a:"are"}]},
+  {n:"38번 38번 2-⑥",t:"g",en:"38번 Something said or done by a player communicates some things that are [A] of that world.",blanks:[{l:"[A]",c:["actual","fictional"],a:"fictional"}]},
+  {n:"38번 38번 3-①",t:"g",en:"38번 [A], a child pretending to be Peter Pan might gasp and draw a plastic knife.",blanks:[{l:"[A]",c:["For example","In contrast"],a:"For example"}]},
+  {n:"38번 38번 3-②",t:"g",en:"38번 For example, a child [A] to be Peter Pan might gasp and draw a plastic knife.",blanks:[{l:"[A]",c:["pretending","pretended"],a:"pretending"}]},
+  {n:"38번 38번 3-③",t:"g",en:"38번 For example, a child pretending [A] Peter Pan might gasp and draw a plastic knife.",blanks:[{l:"[A]",c:["being","to be"],a:"to be"}]},
+  {n:"38번 38번 4-①",t:"g",en:"38번 This might be sufficient [A] that fictionally one of Peter's enemies, such as Captain Hook, is approaching.",blanks:[{l:"[A]",c:["communicating","to communicate"],a:"to communicate"}]},
+  {n:"38번 38번 4-②",t:"g",en:"38번 This might be sufficient to communicate [A] fictionally one of Peter's enemies, such as Captain Hook, is approaching.",blanks:[{l:"[A]",c:["what","that"],a:"that"}]},
+  {n:"38번 38번 4-③",t:"g",en:"38번 This might be sufficient to communicate that fictionally one of Peter's enemies, such as Captain Hook, [A] approaching.",blanks:[{l:"[A]",c:["is","are"],a:"is"}]},
+  {n:"38번 38번 5-①",t:"g",en:"38번 These in-character behaviors can be [A], however, to maintain the necessary amount of common ground.",blanks:[{l:"[A]",c:["sufficient","insufficient"],a:"insufficient"}]},
+  {n:"38번 38번 5-②",t:"g",en:"38번 These in-character behaviors can be insufficient, however, [A] the necessary amount of common ground about what is fictional.",blanks:[{l:"[A]",c:["maintaining","to maintain"],a:"to maintain"}]},
+  {n:"38번 38번 5-③",t:"g",en:"38번 These in-character behaviors can be insufficient to maintain the necessary amount of common ground about [A] is fictional in the world of the make-believe.",blanks:[{l:"[A]",c:["that","what"],a:"what"}]},
+  {n:"38번 38번 6",t:"g",en:"38번 At these times participants often come at least partly out of character to [A] other participants the information they need.",blanks:[{l:"[A]",c:["give","giving"],a:"give"}]},
+  {n:"38번 38번 7-①",t:"g",en:"38번 For example, [A] would be important to avoid confusion about who is playing which character.",blanks:[{l:"[A]",c:["it","that"],a:"it"}]},
+  {n:"38번 38번 7-②",t:"g",en:"38번 For example, it would be important to [A] confusion about who is playing which character.",blanks:[{l:"[A]",c:["avoid","cause"],a:"avoid"}]},],
+  39: [{n:"39번 39번 1-①",t:"g",en:"39번 Our intuition about states of matter [A] from our experience on Earth's surface.",blanks:[{l:"[A]",c:["come","comes"],a:"comes"}]},
+  {n:"39번 39번 1-②",t:"g",en:"39번 Our intuition about states of matter comes from our experience on Earth's surface, [A] the pressure is uniformly low.",blanks:[{l:"[A]",c:["which","where"],a:"where"}]},
+  {n:"39번 39번 1-③",t:"g",en:"39번 Variations in temperature [A] changes in the state of matter from solid to liquid to gas.",blanks:[{l:"[A]",c:["cause","causes"],a:"cause"}]},
+  {n:"39번 39번 2",t:"g",en:"39번 [A], when we think of melting or boiling or the creation of plasma, we intuitively assume it reflects an increase in temperature.",blanks:[{l:"[A]",c:["Therefore","However"],a:"Therefore"}]},
+  {n:"39번 39번 3",t:"g",en:"39번 This bias comes from the fact [A] we live in a very constant pressure environment.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"39번 39번 4",t:"g",en:"39번 Even small changes in pressure can have very [A] effects on our metabolism.",blanks:[{l:"[A]",c:["small","large"],a:"large"}]},
+  {n:"39번 39번 5-①",t:"g",en:"39번 But the pressure changes we experience [A] trivial compared to the pressure range of the overall planetary environment.",blanks:[{l:"[A]",c:["is","are"],a:"are"}]},
+  {n:"39번 39번 5-②",t:"g",en:"39번 But the pressure changes we experience are [A] compared to the pressure range of the overall planetary environment.",blanks:[{l:"[A]",c:["significant","trivial"],a:"trivial"}]},
+  {n:"39번 39번 6",t:"g",en:"39번 Since pressure is [A] by the weight of overlying material, pressures increase rapidly with depth.",blanks:[{l:"[A]",c:["controlling","controlled"],a:"controlled"}]},
+  {n:"39번 39번 7",t:"g",en:"39번 Imagine the pressures [A] by the weight of rock a mile thick!",blanks:[{l:"[A]",c:["generating","generated"],a:"generated"}]},
+  {n:"39번 39번 8",t:"g",en:"39번 For this reason a planet's pressure ranges are [A] — from essentially zero pressure in space to pressures of millions of atmospheres in planetary interiors.",blanks:[{l:"[A]",c:["narrow","enormous"],a:"enormous"}]},],
+  40: [{n:"40번 40번 1-①",t:"g",en:"40번 When self-experimentation and conventional experiments are both possible, the difference between them often [A] the difference between learning and showing.",blanks:[{l:"[A]",c:["resemble","resembles"],a:"resembles"}]},
+  {n:"40번 40번 1-②",t:"g",en:"40번 Self experiments are better for discovery but worse for [A] others that the solution is helpful or the answer is correct.",blanks:[{l:"[A]",c:["convincing","being convinced"],a:"convincing"}]},
+  {n:"40번 40번 1-③",t:"g",en:"40번 Self experiments are better for discovery but worse for convincing others [A] the solution is helpful or the answer is correct.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"40번 40번 2",t:"g",en:"40번 Most scientists want to do both — discover something and [A] others of their discovery.",blanks:[{l:"[A]",c:["convince","convincing"],a:"convince"}]},
+  {n:"40번 40번 3-①",t:"g",en:"40번 [A], psychologists should consider doing both self-experiments and conventional ones.",blanks:[{l:"[A]",c:["Thus","Still"],a:"Thus"}]},
+  {n:"40번 40번 3-②",t:"g",en:"40번 Thus, psychologists should consider [A] both self-experiments and conventional ones.",blanks:[{l:"[A]",c:["doing","to do"],a:"doing"}]},
+  {n:"40번 40번 4",t:"g",en:"40번 The best use of resources may often be self-experiments [A] by conventional ones.",blanks:[{l:"[A]",c:["followed","preceded"],a:"followed"}]},
+  {n:"40번 40번 5-①",t:"g",en:"40번 The researcher begins with self-experiments [A], if all goes well, find large effects and/or generate and eliminate many hypotheses.",blanks:[{l:"[A]",c:["what","that"],a:"that"}]},
+  {n:"40번 40번 5-②",t:"g",en:"40번 The researcher begins with self-experiments that, if all goes well, [A] large effects.",blanks:[{l:"[A]",c:["find","finds"],a:"find"}]},
+  {n:"40번 40번 5-③",t:"g",en:"40번 The researcher begins with self-experiments that [A] and eliminate many hypotheses.",blanks:[{l:"[A]",c:["generate","generates"],a:"generate"}]},
+  {n:"40번 40번 5-④",t:"g",en:"40번 The researcher begins with self-experiments that generate and [A] many hypotheses.",blanks:[{l:"[A]",c:["eliminate","eliminates"],a:"eliminate"}]},
+  {n:"40번 40번 6-①",t:"g",en:"40번 This exploratory and theory-building phase [A] until a convenient solution or large effect is found.",blanks:[{l:"[A]",c:["lasts","ends"],a:"lasts"}]},
+  {n:"40번 40번 6-②",t:"g",en:"40번 This exploratory and theory-building phase lasts until a convenient solution or large effect [A] found.",blanks:[{l:"[A]",c:["is","are"],a:"is"}]},
+  {n:"40번 40번 6-③",t:"g",en:"40번 This exploratory and theory-building phase lasts until a convenient solution or large effect is [A].",blanks:[{l:"[A]",c:["finding","found"],a:"found"}]},
+  {n:"40번 40번 7-①",t:"g",en:"40번 Then the researcher uses self-experiments to [A] the procedural parameters that optimize the solution or maximize the effect.",blanks:[{l:"[A]",c:["find","finding"],a:"find"}]},
+  {n:"40번 40번 7-②",t:"g",en:"40번 Then the researcher uses self-experiments to find the procedural parameters [A] optimize the solution or maximize the effect.",blanks:[{l:"[A]",c:["that","whose"],a:"that"}]},
+  {n:"40번 40번 7-③",t:"g",en:"40번 Then the researcher uses self-experiments to find the procedural parameters that [A] the solution or maximize the effect.",blanks:[{l:"[A]",c:["optimize","optimizes"],a:"optimize"}]},
+  {n:"40번 40번 7-④",t:"g",en:"40번 Then the researcher uses self-experiments to find the procedural parameters that optimize the solution or [A] the effect.",blanks:[{l:"[A]",c:["maximize","maximizes"],a:"maximize"}]},
+  {n:"40번 40번 8-①",t:"g",en:"40번 Only then [A] begin conventional experiments, using the optimized parameters.",blanks:[{l:"[A]",c:["the researcher would","would the researcher"],a:"would the researcher"}]},
+  {n:"40번 40번 8-②",t:"g",en:"40번 Only then would the researcher begin conventional experiments, [A] the optimized parameters.",blanks:[{l:"[A]",c:["using","used"],a:"using"}]},
+  {n:"40번 40번 9",t:"g",en:"40번 The most efficient strategy is for the former [A] the latter.",blanks:[{l:"[A]",c:["preceded","to precede"],a:"to precede"}]},],
+  41: [{n:"41번 41~42번 1",t:"g",en:"41번 The emergence of the social sciences and the ability [A] with large datasets created demand for new ways of visualizing information.",blanks:[{l:"[A]",c:["working","to work"],a:"to work"}]},
+  {n:"41번 41~42번 2",t:"g",en:"41번 Processed numerical information was best [A] in tables, charts, and graphs.",blanks:[{l:"[A]",c:["expressing","expressed"],a:"expressed"}]},
+  {n:"41번 41~42번 3",t:"g",en:"41번 Mathematics, natural sciences, and social sciences [A] employed statistics were at the forefront of the development of charts and graphs.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"41번 41~42번 4",t:"g",en:"41번 History was a consumer, not a designer, of [A] these new visualizations.",blanks:[{l:"[A]",c:["most","most of"],a:"most of"}]},
+  {n:"41번 41~42번 5-①",t:"g",en:"41번 Simple charts and graphs were not difficult [A], and their visual conventions became part of what any ordinary reader would be expected to follow.",blanks:[{l:"[A]",c:["interpreting","to interpret"],a:"to interpret"}]},
+  {n:"41번 41~42번 5-②",t:"g",en:"41번 Simple charts and graphs were not difficult to interpret, and their visual conventions became part of what any ordinary reader would be expected [A].",blanks:[{l:"[A]",c:["following","to follow"],a:"to follow"}]},
+  {n:"41번 41~42번 6-①",t:"g",en:"41번 As statistical analysis became more [A], the visualizations that resulted became more and more central to the argument.",blanks:[{l:"[A]",c:["simple","sophisticated"],a:"sophisticated"}]},
+  {n:"41번 41~42번 6-②",t:"g",en:"41번 As statistical analysis became more sophisticated, the visualizations [A] resulted became more and more central to the argument.",blanks:[{l:"[A]",c:["that","whose"],a:"that"}]},
+  {n:"41번 41~42번 6-③",t:"g",en:"41번 As statistical analysis became more sophisticated, the visualizations that resulted became more and more [A] to the argument.",blanks:[{l:"[A]",c:["central","centrally"],a:"central"}]},
+  {n:"41번 41~42번 7",t:"g",en:"41번 In some cases, the visualization made interpretation [A].",blanks:[{l:"[A]",c:["possible","impossible"],a:"possible"}]},
+  {n:"41번 41~42번 8",t:"g",en:"41번 These success stories [A] the worth of statistical analysis and visualization.",blanks:[{l:"[A]",c:["demonstrated","were demonstrated"],a:"demonstrated"}]},
+  {n:"41번 41~42번 9-①",t:"g",en:"41번 Perhaps the most notable example is John Snow's map of the incidence of cholera in an 1854 London outbreak, [A] helped plot the source of the outbreak at a single water pump.",blanks:[{l:"[A]",c:["which","that"],a:"which"}]},
+  {n:"41번 41~42번 9-②",t:"g",en:"41번 John Snow's map helped [A] the source of the outbreak at a single water pump in the neighborhood.",blanks:[{l:"[A]",c:["plot","plotting"],a:"plot"}]},
+  {n:"41번 41~42번 10",t:"g",en:"41번 Snow's cholera map showed [A] visualizations could serve as both narrative and analysis.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"41번 41~42번 11-①",t:"g",en:"41번 Authors began to experiment with ways of [A] visual clues to tell complex stories about events.",blanks:[{l:"[A]",c:["using","being used"],a:"using"}]},
+  {n:"41번 41~42번 11-②",t:"g",en:"41번 Authors began to experiment with ways of using visual clues to [A] complex stories about events.",blanks:[{l:"[A]",c:["tell","telling"],a:"tell"}]},
+  {n:"41번 41~42번 11-③",t:"g",en:"41번 Authors began to experiment with ways of using visual clues to tell complex stories about events, [A] the amount of information that could be conveyed in a small space.",blanks:[{l:"[A]",c:["increasing","decreasing"],a:"increasing"}]},
+  {n:"41번 41~42번 11-④",t:"g",en:"41번 Authors increased the amount of information [A] could be conveyed in a small space and thereby overcoming the limitations of two dimensions in print.",blanks:[{l:"[A]",c:["that","what"],a:"that"}]},
+  {n:"41번 41~42번 11-⑤",t:"g",en:"41번 Authors thereby [A] the limitations of two dimensions in print.",blanks:[{l:"[A]",c:["overcome","overcoming"],a:"overcoming"}]},],
+};
+const SUBTITLES = {26:"Dennis William Sciama",34:"AI's Humanity of Silence",35:"Standardization of Information and Printing",36:"Agricultural Land Use and Global Food Production",37:"Comparing Kinship Terminology Across Languages",38:"Make-Believe and Fictional Communication",39:"States of Matter and Pressure on Earth",40:"Self-Experimentation vs Conventional Experiments",41:"The Rise of Data Visualization in Social Sciences",21:"Being Good Ancestors",22:"Changing Taste Preferences",23:"Conformity in Teenage Years",24:"Habits & Temptation Bundling",29:"Conceptual Models",30:"Walking as Transportation",31:"Children's Play Space",32:"Illusion of Competence",33:"The Emancipated Number"};
+const ALL_NUMS = [18, 19, 20, 21, 22, 23, 24, 26, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41];
+const STORAGE_KEY = 'quiz_history_wb_master_v3';
+
+let questions=[], idx=0, answers={}, timeouts={}, screen='intro';
+let timerSec=10, timerInterval=null, advancing=false;
+let selectedNums=[...ALL_NUMS];
+let TOTAL=30, CUTLINE=27;
+let userTotal=30, userWrong=3, userName='';
+const CIRCUM=2*Math.PI*20, T_G=10;
+
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function poolSize(){return selectedNums.reduce((a,n)=>a+(SECTIONS[n]?SECTIONS[n].length:0),0);}
+
+function loadHistory(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch{return[];}}
+function saveHistory(name,correct,total,wrong,rangeNums,wrongItems){
+  const h=loadHistory();
+  h.unshift({
+    name,date:new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),
+    correct,total,wrong,pct:Math.round((correct/total)*100),pass:correct>=(total-wrong),
+    range:rangeNums,wrongs:wrongItems
+  });
+  if(h.length>30)h.pop();
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(h));}catch{}
+}
+
+function start(){
+
+  const pool=[];
+  selectedNums.forEach(n=>{if(SECTIONS[n])pool.push(...SECTIONS[n]);});
+  TOTAL=Math.min(userTotal,pool.length);
+  CUTLINE=Math.max(0,TOTAL-userWrong);
+  questions=shuffle(pool).slice(0,TOTAL);
+  idx=0;answers={};timeouts={};screen='quiz';advancing=false;
+  startTimer();render();
+}
+
+function startTimer(){
+  clearInterval(timerInterval);timerSec=T_G;
+  timerInterval=setInterval(()=>{timerSec--;updateTimerUI();if(timerSec<=0)onTimeout();},1000);
+}
+function updateTimerUI(){
+  const ring=document.querySelector('.ring-fill'),num=document.querySelector('.timer-num'),wrap=document.querySelector('.tw-inner');
+  if(!ring||!num)return;
+  ring.style.strokeDashoffset=CIRCUM*(1-(timerSec/T_G));
+  num.textContent=timerSec;
+  if(wrap)wrap.className='tw-inner'+(timerSec<=2?'td':timerSec<=4?'tw':'');
+}
+function onTimeout(){
+  if(advancing)return;
+  clearInterval(timerInterval);timeouts[idx]=true;answers[idx]='__timeout__';advancing=true;
+  render();setTimeout(()=>{advancing=false;advance();},1300);
+}
+function advance(){
+  if(idx<TOTAL-1){advancing=false;idx++;startTimer();render();}
+  else{clearInterval(timerInterval);screen='result';render();}
+}
+function isCorrect(q,qi){
+  const a=answers[qi];if(!a||a==='__timeout__')return false;
+  return q.blanks.every((_,bi)=>answers[`${qi}_${bi}`]===q.blanks[bi].a);
+}
+function scoreQ(){return questions.reduce((c,q,qi)=>isCorrect(q,qi)?c+1:c,0);}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='intro')app.innerHTML=renderIntro();
+  else if(screen==='quiz')app.innerHTML=renderQuiz();
+  else app.innerHTML=renderResult();
+  attachEvents();
+}
+
+function renderIntro(){
+  const pool=poolSize();
+  const canStart=selectedNums.length>0&&pool>0&&pool>=userTotal;
+  const items=ALL_NUMS.map(n=>{
+    const cnt=SECTIONS[n]?SECTIONS[n].length:0,sel=selectedNums.includes(n);
+    return `<div class="check-item ${sel?'selected':''}" data-num="${n}">
+      <div class="check-item-num">${sel?'✓ ':''}${n}번</div>
+      <div class="check-item-sub">${SUBTITLES[n]||''}<br>${cnt}문항</div>
+    </div>`;
+  }).join('');
+  const hist=loadHistory();
+  const histHtml=hist.length===0?`<div class="hist-empty">아직 풀이 기록이 없어요</div>`
+    :hist.map((h,hi)=>{
+      const wh=(h.wrongs&&h.wrongs.length>0)
+        ?h.wrongs.map(w=>`<div class="hd-item ${w.isTO?'hd-to':'hd-ng'}">
+          <div class="hd-qnum">${w.n}${w.isTO?' ⏰':''}</div>
+          ${w.en?`<div class="hd-en">${w.en}</div>`:''}
+          <div class="hd-tags"><span class="tag tag-ng">${w.isTO?'시간초과':'선택: '+w.ua}</span><span class="tag tag-ok">정답: ${w.ans}</span></div>
+        </div>`).join('')
+        :`<div style="font-size:12px;color:var(--hint);text-align:center;padding:6px 0;">오답 없음 🎉</div>`;
+      const rangeChips=(h.range||[]).map(n=>`<span class="range-chip">${n}번</span>`).join('');
+      return `<div class="hist-item" data-hi="${hi}">
+        <div class="hist-top">
+          <div class="hist-left">
+            <div class="hist-name">${h.name||'이름 없음'}</div>
+            <div class="hist-date">${h.date} · 오답허용 ${h.wrong}개</div>
+            <div class="hist-score ${h.pass?'pass':'fail'}">${h.correct} / ${h.total}</div>
+            <div class="hist-bar-wrap"><div class="hist-bar" style="width:${h.pct}%;background:${h.pass?'var(--green)':'var(--red)'}"></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <span class="hist-badge ${h.pass?'hb-pass':'hb-fail'}">${h.pass?'합격':'불합격'}</span>
+            <span class="toggle-txt">오답 보기 ▼</span>
+          </div>
+        </div>
+        <div class="hist-detail" id="hd-${hi}">
+          <div class="hist-range">${rangeChips}</div>
+          ${wh}
+        </div>
+      </div>`;
+    }).join('');
+  return `<div class="intro-box">
+  <div class="intro-logo">2026 어법·어휘 워크북</div>
+  <div class="intro-title">2026 고1 3월 모의고사</div>
+  <div class="intro-sub">출제 범위와 설정을 선택하세요</div>
+  <div class="section-label">📚 번호 선택 (복수 선택 가능)</div>
+  <div class="check-grid">${items}</div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn" id="sel-all">전체 선택</button>
+    <button class="ctrl-btn" id="sel-none">전체 해제</button>
+  </div>
+
+  <div class="set-row">
+    <div class="set-card">
+      <div class="set-lbl">📝 출제 문항 수 <span style="color:var(--hint)">(문항 풀: ${pool}개)</span></div>
+      <input class="set-inp" id="inp-total" type="number" min="1" max="${pool}" value="${Math.min(userTotal,pool)}">
+    </div>
+    <div class="set-card">
+      <div class="set-lbl">❌ 오답 허용 수</div>
+      <input class="set-inp red" id="inp-cut" type="number" min="0" max="${Math.min(userTotal,pool)}" value="${userWrong}">
+    </div>
+  </div>
+  <div class="set-hint">오답 ${userWrong}개 허용 → 커트라인 <strong>${Math.max(0,Math.min(userTotal,pool)-userWrong)}</strong>개 이상 정답
+    ${pool<userTotal?`<br><span style="color:var(--red)">⚠ 문항 풀(${pool})보다 출제 수를 줄여주세요</span>`:''}
+  </div>
+  <button class="start-btn" id="start-btn" ${!canStart?'disabled':''}>시작하기</button>
+
+  <div class="hist-section">
+    <div class="hist-hdr">
+      <span class="hist-ttl">📋 풀이 기록 (최대 30회)</span>
+      ${hist.length>0?`<button class="hist-clear" id="hist-clear">기록 삭제</button>`:''}
+    </div>
+    ${histHtml}
+  </div>
+</div>`;
+}
+
+function renderQuiz(){
+  const q=questions[idx],pct=Math.round((idx/TOTAL)*100);
+  const offset=CIRCUM*(1-(timerSec/T_G)),twCls=timerSec<=2?'td':timerSec<=4?'tw':'';
+  const isTO=timeouts[idx];
+  let enHtml=q.en||'';
+  if(q.blanks)q.blanks.forEach(b=>{enHtml=enHtml.replace(b.l,`<span class="blank-tag">${b.l}</span>`);});
+  const curBi=q.blanks?q.blanks.findIndex((_,bi)=>answers[`${idx}_${bi}`]===undefined):-1;
+  const b=curBi>=0?q.blanks[curBi]:null;
+  let body='';
+  if(isTO){
+    body=`<div class="timeout-msg">⏰ 시간 초과! &nbsp;정답: <strong>${q.blanks.map(x=>x.a).join(' / ')}</strong></div>`;
+  }else if(b){
+    body=`<div class="q-sub">${b.l} 중 알맞은 것은?</div><div class="choices">${b.c.map(c=>`<button class="choice-btn" data-bi="${curBi}" data-ch="${c}">${c}</button>`).join('')}</div>`;
+  }
+  return `<div class="hd-row">
+  <div class="quiz-counter">${userName} &nbsp;·&nbsp; 문항 ${idx+1} / ${TOTAL}</div>
+  <div class="cutline-chip">커트라인 ${CUTLINE}개</div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+<div class="timer-row"><div class="timer-block"><div class="timer-lbl">남은시간</div>
+<div class="tw-inner ${twCls}"><div class="timer-ring"><svg width="52" height="52" viewBox="0 0 52 52"><circle class="ring-bg" cx="26" cy="26" r="20"/><circle class="ring-fill" cx="26" cy="26" r="20" stroke-dasharray="${CIRCUM}" stroke-dashoffset="${offset}"/></svg><div class="timer-num">${timerSec}</div></div></div></div></div>
+<div class="q-card">
+  <div class="q-num">${q.n} &nbsp;<span class="type-badge tb-g">어법 선택</span></div>
+  ${enHtml?`<div class="q-en">${enHtml}</div>`:''}
+  ${body}
+</div>`;
+}
+
+function renderResult(){
+  const correct=scoreQ(),toCount=Object.keys(timeouts).length,pass=correct>=CUTLINE;
+  const pct=Math.round((correct/TOTAL)*100),emoji=pass?(correct===TOTAL?'🎉':'👍'):(correct>=Math.ceil(TOTAL*.7)?'💪':'📚');
+  const wrongIdxs=questions.map((_,qi)=>qi).filter(qi=>!isCorrect(questions[qi],qi));
+  const wrongItems=wrongIdxs.map(qi=>{
+    const q=questions[qi],isTO=!!timeouts[qi];
+    const ans=q.blanks.map(x=>x.a).join(' / ');
+    const ua=q.blanks.map((_,bi)=>{const s=answers[`${qi}_${bi}`];return(!s||s==='__timeout__')?'시간초과':s;}).join(' / ');
+    return{n:q.n,en:q.en||'',ans,ua,isTO};
+  });
+  saveHistory(userName,correct,TOTAL,userWrong,[...selectedNums],wrongItems);
+  return `<div class="result-card">
+  <div class="result-emoji">${emoji}</div>
+  <div style="font-size:16px;font-weight:800;margin-bottom:4px;">${userName}</div>
+  <div class="result-score ${pass?'score-pass':'score-fail'}">${correct} / ${TOTAL}</div>
+  <div class="result-badge ${pass?'badge-pass':'badge-fail'}">${pass?'합격 ✓':'불합격 ✗'} · 커트라인 ${CUTLINE}개</div>
+  <div class="result-pct">정답률 ${pct}% &nbsp;·&nbsp; 범위: ${selectedNums.map(n=>n+'번').join(', ')}</div>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-num s-ok">${correct}</div><div class="stat-lbl">정답</div></div>
+    <div class="stat-card"><div class="stat-num s-ng">${TOTAL-correct-toCount}</div><div class="stat-lbl">오답</div></div>
+    <div class="stat-card"><div class="stat-num s-to">${toCount}</div><div class="stat-lbl">시간초과</div></div>
+  </div>
+  <div class="result-btns">
+    <button class="back-btn" id="back-btn">범위 다시 선택</button>
+    <button class="retry-btn" id="retry-btn">같은 범위 재시작</button>
+  </div>
+</div>
+${wrongIdxs.length>0?`<div class="review-title">오답 목록 (${wrongIdxs.length}개)</div>
+${wrongIdxs.map(qi=>{
+  const q=questions[qi],isTO=!!timeouts[qi];
+  const ans=q.blanks.map(x=>x.a).join(' / ');
+  const ua=q.blanks.map((_,bi)=>{const s=answers[`${qi}_${bi}`];return(!s||s==='__timeout__')?'시간초과':s;}).join(' / ');
+  return `<div class="review-item ${isTO?'to':''}"><div class="r-num">${q.n}${isTO?' ⏰':''}</div>${q.en?`<div class="r-en">${q.en}</div>`:''}<span class="tag ${isTO?'tag-to':'tag-ng'}">${isTO?'시간초과':'선택: '+ua}</span><span class="tag tag-ok">정답: ${ans}</span></div>`;
+}).join('')}`:
+`<div style="text-align:center;color:var(--green);font-weight:800;padding:20px;font-size:15px;">전 문항 정답! 완벽합니다 🎉</div>`}`;
+}
+
+function attachEvents(){
+  const app=document.getElementById('app');
+  const sb=app.querySelector('#start-btn');if(sb)sb.addEventListener('click',start);
+  const rb=app.querySelector('#retry-btn');if(rb)rb.addEventListener('click',start);
+  const bb=app.querySelector('#back-btn');if(bb)bb.addEventListener('click',()=>{screen='intro';render();});
+  const sa=app.querySelector('#sel-all');if(sa)sa.addEventListener('click',()=>{selectedNums=[...ALL_NUMS];render();});
+  const sn=app.querySelector('#sel-none');if(sn)sn.addEventListener('click',()=>{selectedNums=[];render();});
+  const ni=app.querySelector('#name-inp');
+  if(ni){ni.addEventListener('input',()=>{userName=ni.value;render();});setTimeout(()=>{if(document.getElementById('name-inp'))document.getElementById('name-inp').focus();},50);}
+  const inpT=app.querySelector('#inp-total');
+  if(inpT)inpT.addEventListener('change',()=>{userTotal=Math.max(1,parseInt(inpT.value)||1);render();});
+  const inpC=app.querySelector('#inp-cut');
+  if(inpC)inpC.addEventListener('change',()=>{userWrong=Math.max(0,parseInt(inpC.value)||0);render();});
+  const hc=app.querySelector('#hist-clear');
+  if(hc)hc.addEventListener('click',()=>{try{localStorage.removeItem(STORAGE_KEY);}catch{}render();});
+  app.querySelectorAll('.check-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const n=parseInt(item.dataset.num);
+      if(selectedNums.includes(n))selectedNums=selectedNums.filter(x=>x!==n);
+      else selectedNums.push(n);
+      selectedNums.sort((a,b)=>a-b);
+      render();
+    });
+  });
+  app.querySelectorAll('.hist-item').forEach(item=>{
+    item.addEventListener('click',e=>{
+      if(e.target.closest('#hist-clear'))return;
+      const hi=item.dataset.hi,detail=document.getElementById('hd-'+hi);
+      if(!detail)return;
+      const isOpen=detail.classList.contains('open');
+      app.querySelectorAll('.hist-detail').forEach(d=>d.classList.remove('open'));
+      app.querySelectorAll('.toggle-txt').forEach(t=>{t.textContent='오답 보기 ▼';});
+      if(!isOpen){detail.classList.add('open');const txt=item.querySelector('.toggle-txt');if(txt)txt.textContent='닫기 ▲';}
+    });
+  });
+  app.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    const bi=parseInt(btn.dataset.bi),key=`${idx}_${bi}`;
+    if(answers[key]!==undefined||advancing)return;
+    clearInterval(timerInterval);advancing=true;
+    const cor=questions[idx].blanks[bi].a,ch=btn.dataset.ch;
+    answers[key]=ch;answers[idx]=ch;
+    const ok=ch===cor;
+    btn.classList.add(ok?'correct':'wrong');
+    btn.parentElement.querySelectorAll('.choice-btn').forEach(b2=>{b2.disabled=true;if(!ok&&b2.dataset.ch===cor)b2.classList.add('correct');});
+    const nb=questions[idx].blanks.findIndex((_,i)=>answers[`${idx}_${i}`]===undefined);
+    setTimeout(()=>{if(nb>=0){advancing=false;clearInterval(timerInterval);timerSec=T_G;startTimer();render();}else{advancing=false;advance();}},ok?400:800);
+  }));
+}
+render();
+</script>
+</body>
+</html>
